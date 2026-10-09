@@ -2,7 +2,12 @@
 
 // R30 (branch mac-v1 only). jackmaxwil's RED4ext-macos loader loads the plugins from a hook on the game's main(), before the RTTI system runs its
 // register callbacks, and it has no Frida script. So the natives register the way the Windows plugins and his ports do it: through the game's own
-// CRTTISystem::AddRegisterCallback, in place of the Frida script's NATREG call at InitScripts entry.
+// CRTTISystem callbacks, in place of the Frida script's NATREG call at InitScripts entry.
+// It is the POST-register callback (R30 J1): the game runs its own register callbacks first (its classes) and then the post-register callbacks
+// in the order they were added (its own describe steps, added by its static registrars before main(), so before ours). Our entry points
+// register AND describe (RedLib RunPending, Codeware's global publishing), so they must run after the game's describe steps, which is where the
+// Frida script ran them. From the register callback they ran too early: 73 game properties instead of 19173, an empty global function map,
+// and LoadScripts returned 0.
 // Each of our three plugins adds the same callback. Whichever runs first calls the three exported entry points in the order the Frida script used
 // (TweakXL, ArchiveXL, Codeware; each entry point runs once, the later callbacks find them done). An entry point of a plugin that is not loaded is
 // skipped. The post-load step (codeware_postLoadScripts, which also runs archivexl_postLoadScripts) is Codeware's: see macos/MacV1.cpp.
@@ -34,8 +39,8 @@ inline bool AddNativeRegistrationCallback(const char* aTag)
         std::fprintf(stderr, "[%s] R30 no RTTI system at plugin load: the natives cannot register\n", aTag);
         return false;
     }
-    rtti->AddRegisterCallback(&RunNativeRegistration);
-    std::fprintf(stderr, "[%s] R30 RTTI register callback added (natives register when the game runs the callbacks)\n", aTag);
+    rtti->AddPostRegisterCallback(&RunNativeRegistration);
+    std::fprintf(stderr, "[%s] R30 RTTI post-register callback added (natives register after the game's own describe steps)\n", aTag);
     return true;
 }
 }
