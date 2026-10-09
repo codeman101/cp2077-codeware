@@ -119,6 +119,18 @@ inline void ExitWhenAllPluginsUnloaded(const char* aName)
         return;
     }
 
+#if defined(CP2077_MAC_V1)
+    // mac-v1 (R30): jackmaxwil's RED4ext-macos loader does not detach hooks or touch its logger after the plugins unload (App::Destruct on macOS),
+    // so the crash this works around belongs to the old loader. Off by default here; CP2077_MAC_EXIT_WORKAROUND=1 turns it back on for a test.
+    const char* workaround = std::getenv("CP2077_MAC_EXIT_WORKAROUND");
+    if (!workaround || std::strcmp(workaround, "1") != 0)
+    {
+        std::fprintf(stderr, "[%s] R30 last plugin unloaded (signal: %s); the loader finishes the exit (CP2077_MAC_EXIT_WORKAROUND=1 would leave with _exit)\n", aName, signal);
+        std::fflush(nullptr);
+        return;
+    }
+#endif
+
     std::fprintf(stderr, "[%s] R27 last plugin unloaded while the process exits (signal: %s): leaving it (RED4ext's own exit code crashes)\n", aName, signal);
     std::fflush(nullptr);
     _exit(0);

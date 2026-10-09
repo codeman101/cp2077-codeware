@@ -16,6 +16,8 @@ if(NOT APPLE)
 endif()
 
 add_compile_definitions(RED4EXT_PLATFORM_MACOS)
+# R30: the mac-v1 branch builds for jackmaxwil's RED4ext-macos loader (natives through the RTTI register callbacks, no Frida script).
+add_compile_definitions(CP2077_MAC_V1=1)
 add_compile_definitions(RED4EXT_USE_FRIDA_GADGET)
 add_compile_definitions(RED4EXT_HEADER_ONLY)
 add_compile_definitions(HOOKCHAIN_SELF=codeware)
@@ -53,6 +55,7 @@ set(CODEWARE_SOURCES
     Main.cpp
     ../src/rtti.cpp
     MacSupport.cpp
+    MacV1.cpp
     MacAddressResolver.cpp
     MacR13.cpp
     MacGameInstanceHook.cpp

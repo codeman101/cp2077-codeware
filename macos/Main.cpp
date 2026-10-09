@@ -2,6 +2,14 @@
 #include "MacExit.hpp"
 #include "MacR13.hpp"
 #include "MacR15.hpp"
+#include "MacV1Natives.hpp"
+
+#if defined(CP2077_MAC_V1)
+namespace Mac::V1
+{
+bool InstallScriptLoadedHook(); // macos/MacV1.cpp
+}
+#endif
 
 #include "App/Application.hpp"
 #include "App/Callback/CallbackSystem.hpp"
@@ -57,6 +65,12 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::v1::PluginHandle aHandle, RED4e
             // is still single-threaded. Their bodies wait for the CallbackSystem to exist before dispatching.
             const bool hooksOk = App::InstallMacCallbackHooks();
             MAC_DIAG_UNLESS(hooksOk, "[cw] callback hooks installed=%d\n", hooksOk ? 1 : 0);
+
+#if defined(CP2077_MAC_V1)
+            // R30. Natives through the RTTI register callback, and the post-load step after the script loader returns (no Frida script).
+            Mac::V1::AddNativeRegistrationCallback("cw");
+            Mac::V1::InstallScriptLoadedHook();
+#endif
 
             // The GameInstance hook, the GetGameInstance hook, the script validator layer and the opcode handlers are
             // installed by App::ScriptingService (it is registered in App::Application and bootstrapped above).
