@@ -1,0 +1,40 @@
+# Image-relative offsets Codeware hooks (RED4EXT_GUM_HOOK_OFFSETS allowlist entries). One per line; # starts a comment.
+# RED4ext-macos installs a detour only for an offset on the allowlist; any other Attach reports success and does nothing.
+# Kept in step with the hooks of the build by tools/build-all.sh, which merges the lists of the three plugins into builds/release/GUM_OFFSETS.txt.
+0xc95744  # Entity_Reassemble
+0xc97e28  # Entity_Assemble
+0xc985ec  # Entity_Initialize
+0xc992c4  # Entity_Uninitialize
+0xc99368  # Entity_Attach
+0xc996c0  # Entity_Detach
+0xc999e0  # Entity_Dispose
+0xca41e0  # EntityBuilder_ExtractComponentsJob
+0xca633c  # IComponent_Toggle
+0xdc8d0c  # SoundBankManager_ReadSoundBanksJson
+0x12e6f44  # VehicleController_ToggleAuxLights
+0x1f2d640  # GameInstance constructor
+0x1f42944  # GetScriptGameInstance
+0x1f8dffc  # PersistentObject_InitializeState
+0x2161438  # ObjectSerializer_Prepare
+0x2197aac  # CClass_CreateInstance
+0x21ecfd8  # ScriptBundle_dtor
+0x21fbf90  # ScriptValidator_Validate
+0x21fcfb8  # ScriptValidator_ValidateProperty
+0x2257548  # ResourceSerializer_MacLoadJob
+0x2257830  # ResourceSerializer_MacPostLoadJob
+0x2f67db4  # Localization_LoadOnScreens
+0x3d9e494  # CBaseEngine_InitEngine
+0x3d9efc8  # CBaseEngine_LoadGatheredResources
+0x3f0d900  # CGameFramework_InitializeGameInstance
+0x3fd4d70  # PlayerSystem_OnPlayerSpawned
+0x42eaf14  # PointOfInterestMappin_SetPhase
+0x47cf584  # InkLogicController_OnInitialize
+0x48842e0  # InkSystem_ProcessInputEvents
+0x4887524  # InkSystem_ProcessCharacterEvent
+0x4965980  # InkWidgetLibrary_AsyncSpawnFromLocal
+0x4965b38  # InkWidgetLibrary_AsyncSpawnFromExternal
+0x4965de0  # InkWidgetLibrary_SpawnFromLocal
+0x4965ec0  # InkWidgetLibrary_SpawnFromExternal
+0x49799b8  # InkSpawner_FinishAsyncSpawn
+0x49a3084  # InkWidget_ScriptAddChild
+0x49b888c  # InkWidget_ScriptReparent
