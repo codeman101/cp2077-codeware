@@ -4,6 +4,15 @@
 #define X_RTTI_STR2(x) X_RTTI_STR1(x)
 #define X_RTTI_LOCATION __FILE__ ":" X_RTTI_STR2(__LINE__)
 
+#if defined(__APPLE__)
+#define X_RTTI_CAT2(a, b) a##b
+#define X_RTTI_CAT(a, b) X_RTTI_CAT2(a, b)
+#define X_RTTI_FORCE_REGISTRAR(...) \
+    [[maybe_unused]] __attribute__((used)) static const void* const X_RTTI_CAT(x_rtti_force_, __COUNTER__) = &__VA_ARGS__::s_registrar;
+#else
+#define X_RTTI_FORCE_REGISTRAR(...)
+#endif
+
 #define X_RTTI_TYPENAME(...) ::nameof::nameof_short_type<__VA_ARGS__>()
 
 #define X_RTTI_NAME_SV(...) []() constexpr noexcept { \
@@ -71,7 +80,8 @@ public: \
             using T = Type; \
             _desc; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::ClassDefinition<_class>)
 
 #define RTTI_EXPAND_CLASS(...) X_RTTI_OVERLOAD(X_RTTI_EXPAND_CLASS, __VA_ARGS__)
 #define X_RTTI_EXPAND_CLASS_2(_class, _desc) \
@@ -85,7 +95,8 @@ public: \
             using T = Type; \
             _desc; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::ClassExpansion<_class, X_RTTI_LOCATION>)
 #define X_RTTI_EXPAND_CLASS_3(_class, _expansion, _desc) \
     template<> \
     struct Red::TypeInfoBuilder<Red::ClassExpansion<_class, Red::Scope::For<_expansion>()>{}> \
@@ -97,7 +108,8 @@ public: \
             using T = Type; \
             _desc; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::ClassExpansion<_class, Red::Scope::For<_expansion>()>)
 
 #define RTTI_ABSTRACT() type->MarkAbstract()
 #define RTTI_SCRIPTED() type->MarkScripted()
@@ -173,7 +185,8 @@ public: \
         { \
             return _name; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::EnumDefinition<_enum>)
 
 #define RTTI_DEFINE_FLAGS(...) X_RTTI_OVERLOAD(X_RTTI_DEFINE_FLAGS, __VA_ARGS__)
 #define X_RTTI_DEFINE_FLAGS_1(_enum) X_RTTI_DEFINE_FLAGS_2(_enum, X_RTTI_TYPENAME(_enum))
@@ -187,7 +200,8 @@ public: \
         { \
             return _name; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::FlagsDefinition<_enum>)
 
 #define RTTI_EXPAND_ENUM(...) X_RTTI_OVERLOAD(X_RTTI_EXPAND_ENUM, __VA_ARGS__)
 #define X_RTTI_EXPAND_ENUM_1(_enum) X_RTTI_EXPAND_ENUM_2(_enum, _enum)
@@ -201,7 +215,8 @@ public: \
         { \
             type->template AddOptions<_expansion>(); \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::EnumExpansion<_enum, X_RTTI_LOCATION>)
 
 #define RTTI_EXPAND_FLAGS(...) X_RTTI_OVERLOAD(X_RTTI_EXPAND_FLAGS, __VA_ARGS__)
 #define X_RTTI_EXPAND_FLAGS_1(_enum) X_RTTI_EXPAND_FLAGS_2(_enum, _enum)
@@ -215,7 +230,8 @@ public: \
         { \
             type->template AddFlags<_expansion>(); \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::EnumExpansion<_enum, X_RTTI_LOCATION>)
 
 #define RTTI_OPTION() static_assert(false, "Not Implemented")
 
@@ -229,7 +245,8 @@ public: \
         { \
             _desc; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::GlobalDefinition<X_RTTI_LOCATION>)
 #define X_RTTI_DEFINE_GLOBALS_2(_namespace, _desc) \
     template<> \
     struct Red::TypeInfoBuilder<Red::GlobalDefinition<X_RTTI_LOCATION>{}> \
@@ -240,7 +257,8 @@ public: \
             using namespace _namespace; \
             _desc; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::GlobalDefinition<X_RTTI_LOCATION>)
 
 #define RTTI_FUNCTION(...) X_RTTI_OVERLOAD(X_RTTI_FUNCTION, __VA_ARGS__)
 #define X_RTTI_FUNCTION_1(_func) X_RTTI_FUNCTION_2(_func, X_RTTI_NAME(_func))

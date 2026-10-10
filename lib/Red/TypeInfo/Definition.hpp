@@ -12,6 +12,29 @@
 
 namespace Red
 {
+#if defined(__APPLE__)
+// Qualified so this is RED4ext::GameInstance even when this header is parsed
+// before `using namespace RED4ext` is visible inside namespace Red.
+::RED4ext::GameInstance* MacGameInstance();
+// Hooks the GameInstance constructor so MacGameInstance has the live pointer. Defined in macos/MacSupport.cpp.
+bool MacInstallGameInstanceHook();
+void MacMarkPostLoadScripts();
+// Virtual RegisterFunction can miss the global map. Defined in macos/MacSupport.cpp.
+void MacPublishGlobal(::RED4ext::CRTTISystem* aRtti, const char* aName, ::RED4ext::CGlobalFunction* aFunc);
+#endif
+
+namespace Detail
+{
+// The instance arguments of the type virtuals: the Mac SDK spells them ScriptInstance (void*), the Windows SDK pin const void* / void*.
+#if defined(__APPLE__)
+using InstancePtr = ScriptInstance;
+using ConstInstancePtr = const ScriptInstance;
+#else
+using InstancePtr = void*;
+using ConstInstancePtr = const void*;
+#endif
+}
+
 template<Scope>
 struct TypeInfoBuilder;
 
@@ -667,7 +690,7 @@ public:
 template<typename TClass>
 class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
 {
-    const bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
+    const bool IsEqual(Detail::ConstInstancePtr aLhs, Detail::ConstInstancePtr aRhs, uint32_t a3) final // 48
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -679,7 +702,7 @@ class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
         }
         else
         {
-            using func_t = bool (*)(CClass*, const void*, const void*, uint32_t);
+            using func_t = bool (*)(CClass*, Detail::ConstInstancePtr, Detail::ConstInstancePtr, uint32_t);
 #if defined(RED4EXT_V1_SDK_VERSION_CURRENT) || defined(RED4EXT_SDK_0_5_0)
             static UniversalRelocFunc<func_t> func(RED4ext::Detail::AddressHashes::TTypedClass_IsEqual);
 #else
@@ -689,7 +712,7 @@ class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
         }
     }
 
-    void Assign(void* aLhs, const void* aRhs) const final // 50
+    void Assign(Detail::InstancePtr aLhs, Detail::ConstInstancePtr aRhs) const final // 50
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -725,7 +748,7 @@ class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
         }
     }
 
-    void ConstructCls(void* aMemory) const final // D8
+    void ConstructCls(Detail::InstancePtr aMemory) const final // D8
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -740,7 +763,7 @@ class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
         }
     }
 
-    void DestructCls(void* aMemory) const final // E0
+    void DestructCls(Detail::InstancePtr aMemory) const final // E0
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -898,6 +921,12 @@ public:
         func->flags.isStatic = true;
 
         RegisterFunction(func);
+#if defined(__APPLE__)
+        if (!GetFunction(CName(aName)))
+        {
+            MacPublishGlobal(this, aName, func);
+        }
+#endif
 
         return func;
     }
@@ -923,6 +952,12 @@ public:
 
             Detail::DescribeNativeFunction(func, AFunction);
             RegisterFunction(func);
+#if defined(__APPLE__)
+            if (!GetFunction(CName(aName)))
+            {
+                MacPublishGlobal(this, aName, func);
+            }
+#endif
 
             return func;
         }
@@ -945,6 +980,18 @@ struct SystemBuilder
             }
             else
             {
+#if defined(__APPLE__)
+                const auto gameInstance = MacGameInstance();
+                if (gameInstance)
+                {
+                    static const auto systemType = GetType<TSystem>();
+                    const auto systemInstance = gameInstance->systemMap.Get(systemType);
+                    if (systemInstance)
+                    {
+                        *aRet = *systemInstance;
+                    }
+                }
+#else
                 const auto framework = CGameEngine::Get()->framework;
                 if (framework && framework->gameInstance)
                 {
@@ -955,6 +1002,7 @@ struct SystemBuilder
                         *aRet = *systemInstance;
                     }
                 }
+#endif
             }
         }
     }
@@ -975,6 +1023,17 @@ struct SystemBuilder
 
     static inline void RegisterSystem()
     {
+#if defined(__APPLE__)
+        // CGameEngine hash 0x97F209D6 is not in the mac table, so the Windows
+        // framework check can never pass. Re-queue until GetGameInstance returns
+        // a pointer. codeware_postLoadScripts runs the queue again.
+        auto gameInstance = MacGameInstance();
+        if (!gameInstance)
+        {
+            TypeInfoRegistrar::AddDescribeCallback(&RegisterSystem);
+            return;
+        }
+#else
         auto engine = CGameEngine::Get();
 
         if (!engine || !engine->framework)
@@ -984,6 +1043,7 @@ struct SystemBuilder
         }
 
         auto gameInstance = engine->framework->gameInstance;
+#endif
         auto systemType = GetClass<TSystem>();
 
         if (gameInstance->systemMap.Get(systemType))
@@ -994,13 +1054,24 @@ struct SystemBuilder
         if (!systemInstance)
             return;
 
+#if defined(__APPLE__)
+        systemInstance->gameInstance = gameInstance;
+        JobHandle job{};
+#else
         JobHandle job{};
         systemInstance->gameInstance = gameInstance;
+#endif
         systemInstance->OnInitialize(job);
 
         gameInstance->systemMap.Insert(systemType, systemInstance);
         gameInstance->systemImplementations.Insert(systemType, systemType);
+#if defined(__APPLE__)
+        // Handle<Derived> does not construct Handle<IScriptable> unambiguously
+        // on this SDK. The conversion operator yields the base handle.
+        gameInstance->systemInstances.EmplaceBack(static_cast<Handle<IScriptable>&>(systemInstance));
+#else
         gameInstance->systemInstances.EmplaceBack(systemInstance);
+#endif
     }
 
     static inline Handle<TSystem> BuildSystem()
@@ -1023,9 +1094,28 @@ struct ClassDefinition
     using Descriptor = ClassDescriptorDefaultImpl<TClass>;
     using Specialization = TypeInfoBuilder<Scope::For<TClass>()>;
 
+#if defined(__APPLE__)
+    // macOS (R22): a class with this name that another plugin (or the game) registered first is not registered twice: the first
+    // registration wins and this one is skipped, including its describe step. Example: Codeware's stand-in class "ArchiveXL" next to
+    // the real ArchiveXL plugin.
+    static inline bool s_skipped = false;
+#endif
+
     static inline void RegisterType()
     {
         constexpr auto name = GetTypeNameStr<TClass>();
+
+#if defined(__APPLE__)
+        if (CRTTISystem::Get()->GetClass(CNamePool::Add(name.data())))
+        {
+            s_skipped = true;
+            if (const char* diag = std::getenv("CODEWARE_MAC_DIAG"); diag && diag[0] == '1')
+            {
+                std::fprintf(stderr, "[redlib] class %s is already registered, this registration is skipped\n", name.data());
+            }
+            return;
+        }
+#endif
 
         auto* type = Red::Memory::RTTIAllocator::Get()->Alloc<Descriptor>();
         new (type) Descriptor();
@@ -1044,6 +1134,11 @@ struct ClassDefinition
     static inline void DescribeType()
     {
         constexpr auto name = GetTypeName<TClass>();
+
+#if defined(__APPLE__)
+        if (s_skipped)
+            return;
+#endif
 
         auto* rtti = CRTTISystem::Get();
         auto* type = reinterpret_cast<Descriptor*>(rtti->GetClass(name));
@@ -1118,6 +1213,17 @@ struct ClassExpansion
 
             auto* rtti = CRTTISystem::Get();
             auto* type = reinterpret_cast<Descriptor*>(rtti->GetClass(name));
+#if defined(__APPLE__)
+            // Generated classes are stored under NAME (gameJournalManager) or
+            // ALIAS (JournalManager). Try both before giving up.
+            if (!type)
+            {
+                if constexpr (Detail::HasGeneratedTypeName<TClass>)
+                {
+                    type = reinterpret_cast<Descriptor*>(rtti->GetClass(CName(TClass::ALIAS)));
+                }
+            }
+#endif
 
             if (!type)
                 return;

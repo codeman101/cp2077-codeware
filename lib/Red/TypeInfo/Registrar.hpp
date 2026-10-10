@@ -19,6 +19,24 @@ public:
         QueuePendingDescribeCallbacks();
     }
 
+    // Run the queued RedLib callbacks on this thread. macOS calls this from
+    // codeware_registerNatives and again from codeware_postLoadScripts.
+    static inline void RunPending()
+    {
+        ProcessPendingRegisterCallbacks();
+        ProcessPendingDescriberCallbacks();
+    }
+
+    static inline std::size_t PendingRegisterCount()
+    {
+        return s_registerCallbacks.size();
+    }
+
+    static inline std::size_t PendingDescribeCount()
+    {
+        return s_describeCallbacks.size();
+    }
+
     static inline void AddRegisterCallback(Callback aRegister)
     {
         if (aRegister)
