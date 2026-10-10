@@ -313,7 +313,12 @@ bool App::DynamicEntitySystem::SpawnFromEntityState(const App::DynamicEntityStat
                                          aEntityState->entitySpec->orientation,
                                          aEntityState->entitySpec->recordID};
 
+#if defined(__APPLE__)
+    // macOS: CreateStub returns the token through x8 (the SDK declares the Apple form); the callback goes as an rvalue.
+    token = m_entityStubSystem->CreateStub(request, Red::EntityStubCallback([this, aEntityState](Red::EntityStubTokenPtr& aToken) {
+#else
     m_entityStubSystem->CreateStub(token, request, [this, aEntityState](Red::EntityStubTokenPtr& aToken) {
+#endif
         if (aToken->status != Red::EntityStubStatus::Created)
         {
             RemoveEntityState(aEntityState);
@@ -334,7 +339,11 @@ bool App::DynamicEntitySystem::SpawnFromEntityState(const App::DynamicEntityStat
         }
 
         m_populationSystem->RegisterEntity(request);
+#if defined(__APPLE__)
+    }));
+#else
     });
+#endif
 
     return true;
 }
