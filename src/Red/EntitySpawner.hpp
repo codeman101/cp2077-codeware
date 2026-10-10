@@ -17,6 +17,13 @@ struct EntitySpawnerToken
             /* type = */ void (*)(Red::EntitySpawnerToken*)>();
 
         DestructToken(this);
+#if defined(__APPLE__)
+        // R21: the game's destructor (Mac 0xCE0D28; Windows 0xCD921C does the same) releases the entity Handle at +0x10 without clearing
+        // it, and the member destructor below would release it a second time. Clear the Handle words so that second release is a no-op.
+        // The game destroys nothing else this struct owns.
+        reinterpret_cast<uint64_t*>(&entity)[0] = 0;
+        reinterpret_cast<uint64_t*>(&entity)[1] = 0;
+#endif
     }
 
     uint64_t unk00;        // 00
@@ -55,6 +62,18 @@ RED4EXT_ASSERT_OFFSET(EntitySpawnerRequest, priority, 0xE1);
 
 struct EntitySpawner
 {
+#if defined(__APPLE__)
+    // Mac ABI (R21): the SharedPtr comes back through x8 (the Windows result argument is gone), x1 is the request.
+    SharedPtr<EntitySpawnerToken> SpawnEntity(const EntitySpawnerRequest& aRequest)
+    {
+        constexpr auto SpawnEntityNative = Core::RawFunc<
+            /* addr = */ Red::AddressLib::EntitySpawner_SpawnEntity,
+            /* type = */ Red::SharedPtr<Red::EntitySpawnerToken> (*)(Red::EntitySpawner* aSpawner,
+                                                                     const Red::EntitySpawnerRequest& aRequest)>();
+
+        return SpawnEntityNative(this, aRequest);
+    }
+#else
     SharedPtr<EntitySpawnerToken> SpawnEntity(const EntitySpawnerRequest& aRequest)
     {
         constexpr auto SpawnEntity = Core::RawFunc<
@@ -67,5 +86,6 @@ struct EntitySpawner
         SpawnEntity(this, token, aRequest);
         return token;
     }
+#endif
 };
 }

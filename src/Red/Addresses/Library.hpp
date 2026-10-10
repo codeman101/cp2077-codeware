@@ -120,6 +120,16 @@ constexpr uint32_t ResourceSerializer_SchedulePostLoadJobs = 3599579551;
 constexpr uint32_t ResourceSerializer_ScheduleFinalizeJobs = 949631709;
 constexpr uint32_t ResourceSerializer_OnDependenciesReady = 1185093671;
 constexpr uint32_t ResourceSerializer_OnResourceReady = 1147149338;
+#if defined(__APPLE__)
+// R13. Mac-only ids, not SDK hashes and not in cyberpunk2077_addresses.json. They are job bodies:
+// 0x2257548 runs after deserialization (Resource/Load), 0x2257830 after post-load (Resource/PostLoad).
+// macos/MacAddressResolver.cpp maps both to RVAs.
+constexpr uint32_t ResourceSerializer_MacLoadJob = 0xC0DE0001;
+constexpr uint32_t ResourceSerializer_MacPostLoadJob = 0xC0DE0002;
+// R14. Mac-only id. 0x1F44968 is the game's own ScriptGameInstance builder, void(ScriptGameInstance*, GameInstance*).
+// The GetGameInstance native (0x1F42944, SDK hash GetScriptGameInstance) calls it with the instance from the frame.
+constexpr uint32_t MacScriptGameInstanceCtor = 0xC0DE0003;
+#endif
 
 constexpr uint32_t RuntimeEntityRegistry_RegisterEntity = 2840271332; // world::RuntimeEntityRegistry::RegisterEntity
 constexpr uint32_t RuntimeEntityRegistry_UnregisterEntity = 3878623943;

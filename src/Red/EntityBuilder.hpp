@@ -77,7 +77,14 @@ constexpr auto ExtractComponentsJob = Core::RawFunc<
     /* addr = */ Red::AddressLib::EntityBuilder_ExtractComponentsJob,
     /* type = */ void (*)(Red::EntityBuilderJobParams* aParams, void* a2)>();
 
+#if defined(__APPLE__)
+// Mac (R18): the builder builds the job closure itself, so the function takes the builder and the job queue.
+constexpr auto ScheduleExtractComponentsJob = Core::RawFunc<
+    /* addr = */ Red::AddressLib::EntityBuilder_ScheduleExtractComponentsJob,
+    /* type = */ void (*)(Red::EntityBuilder* aBuilder, Red::JobQueue& aJobQueue)>();
+#else
 constexpr auto ScheduleExtractComponentsJob = Core::RawFunc<
     /* addr = */ Red::AddressLib::EntityBuilder_ScheduleExtractComponentsJob,
     /* type = */ void (*)(Red::JobQueue& aJobQueue, void* a2, Red::EntityBuilderJobParams* aParams)>();
+#endif
 }

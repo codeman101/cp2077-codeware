@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__APPLE__)
+#include <atomic>
+#endif
+
 #include "App/Callback/CallbackSystemController.hpp"
 #include "App/Callback/CallbackSystemEvent.hpp"
 #include "App/Callback/CallbackSystemHandler.hpp"
@@ -41,6 +45,15 @@ public:
     [[nodiscard]] bool IsRestored() const;
     [[nodiscard]] bool IsPreGame() const;
 
+    // True when at least one callback is registered for the event. A cheap pre-check for hooks that would otherwise build
+    // an event object (or copy game data) just to find that nobody listens.
+    inline bool HasCallbacks(Red::CName aEventName)
+    {
+        std::shared_lock _(m_callbacksLock);
+        const auto it = m_callbacksByEvent.find(aEventName);
+        return it != m_callbacksByEvent.end() && !it.value().empty();
+    }
+
     template<typename Event, typename... Args>
     inline bool DispatchNativeEvent(Red::CName aEventName, Args&&... aArgs)
     {
@@ -67,6 +80,39 @@ public:
     }
 
     static Red::Handle<CallbackSystem>& Get();
+
+#if defined(__APPLE__)
+    // R13. True once Get() has built the singleton. The Mac resource and entity hooks are installed at
+    // plugin load, before the CallbackSystem class is registered, and must not build the system early.
+    static bool Exists()
+    {
+        return s_exists.load(std::memory_order_acquire);
+    }
+
+    // SELFTEST R18. Every event name the controllers declared, for the callback self-test.
+    Core::Vector<Red::CName> MacSupportedEventNames()
+    {
+        Core::Vector<Red::CName> names;
+        for (auto it = m_supportedEvents.begin(); it != m_supportedEvents.end(); ++it)
+        {
+            names.push_back(it.key());
+        }
+        return names;
+    }
+
+    // DIAG R14. Callbacks registered per event name (the deprecated names are mapped to the new ones:
+    // Resource/Loaded is Resource/Load, Resource/Ready is Resource/PostLoad, Entity/Attached is Entity/AfterAttach).
+    Core::Vector<std::pair<Red::CName, size_t>> MacCallbackCounts()
+    {
+        Core::Vector<std::pair<Red::CName, size_t>> counts;
+        std::shared_lock _(m_callbacksLock);
+        for (auto it = m_callbacksByEvent.begin(); it != m_callbacksByEvent.end(); ++it)
+        {
+            counts.emplace_back(it.key(), it.value().size());
+        }
+        return counts;
+    }
+#endif
 
 protected:
     void OnWorldAttached(Red::world::RuntimeScene*) override;
@@ -115,11 +161,23 @@ protected:
     Core::Map<Red::CName, Red::CName> m_eventMappings;
 
     inline static Red::Handle<CallbackSystem> s_self;
+#if defined(__APPLE__)
+    inline static std::atomic<bool> s_exists{false};
+#endif
 
     RTTI_IMPL_TYPEINFO(App::CallbackSystem);
     RTTI_IMPL_ALLOCATOR();
 };
 }
+
+#if defined(__APPLE__)
+namespace App
+{
+// R13. Attaches the three Mac callback hooks (Resource/Load, Resource/PostLoad, Entity/Attach) once, at
+// plugin load. Needs the address resolver and the hooking driver to be set. Defined in CallbackSystem.cpp.
+bool InstallMacCallbackHooks();
+}
+#endif
 
 RTTI_DEFINE_CLASS(App::CallbackSystem, {
     RTTI_METHOD(RegisterCallback);

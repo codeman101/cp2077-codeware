@@ -92,10 +92,18 @@ constexpr auto Detach = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_Detach,
     /* type = */ void (*)(Red::Entity* aEntity)>();
 
+#if defined(__APPLE__)
+// Mac ABI (R18): the TweakDBID (8 bytes, trivially copyable) comes back in x0 and there is no out pointer. The result is 0
+// when the parameter is null or holds no record. The entity argument is unused by the function.
+constexpr auto ResolveRecordID = Core::RawFunc<
+    /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
+    /* type = */ uint64_t (*)(Red::Entity* aEntity, Red::populationPopulationSpawnParameter* aParam)>();
+#else
 constexpr auto ResolveRecordID = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
     /* type = */ void (*)(Red::Entity* aEntity, Red::TweakDBID& aOut,
                           Red::populationPopulationSpawnParameter* aParam)>();
+#endif
 
 // constexpr auto GetComponents = Core::RawFunc<
 //     /* addr = */ Red::AddressLib::Entity_GetComponents,

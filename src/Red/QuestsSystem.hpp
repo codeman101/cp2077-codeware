@@ -171,7 +171,11 @@ struct FactManager
     {
 #ifndef NDEBUG
         if (GetFact(NamedFactStore, aFact) != 0)
+        {
+#if defined(_MSC_VER)
             __nop();
+#endif
+        }
 #endif
         SetFact(NamedFactStore, aFact, 0);
     }
@@ -182,7 +186,11 @@ struct FactManager
         {
 #ifndef NDEBUG
             if (GetFact(store, aFact) != 0)
+            {
+#if defined(_MSC_VER)
                 __nop();
+#endif
+            }
 #endif
             SetFact(store, aFact, 0);
         }
@@ -222,6 +230,28 @@ using RootPhase = Core::OffsetPtr<0x68, Red::Handle<Red::questPhaseInstance>>;
 using NodePathHashMap = Core::OffsetPtr<0x78, Red::HashMap<Red::QuestNodePathHash, Red::QuestNodePath>>;
 using FactManager = Core::OffsetPtr<0xF8, Red::FactManager*>;
 
+#if defined(__APPLE__)
+// Mac (R21): clang inlined the Windows wrapper into the 18 callers, so there is no CreateContext function. The QuestContext
+// constructor it forwards to is the row (Mac-only id 0xC0DE0011); the arguments after the first five are fields of the quest
+// system (the same offsets as on Windows).
+constexpr auto QuestContextCtor = Core::RawFunc<
+    /* addr = */ 0xC0DE0011,
+    /* type = */ void* (*)(Red::QuestContext* aContext, int32_t a3, int32_t a4, int32_t a5, int32_t a6,
+                           void* a7, void* a8, void* a9, void* a10, void* a11, void* a12, void* a13)>();
+
+struct CreateContextFn
+{
+    void* operator()(Red::questIQuestsSystem* aSystem, Red::QuestContext* aContext, int32_t a3, int8_t a4, int32_t a5,
+                     int32_t a6) const
+    {
+        auto* base = reinterpret_cast<uint8_t*>(aSystem);
+        return QuestContextCtor(aContext, a3, a4, a5, a6, *reinterpret_cast<void**>(base + 0xE8), base + 0xA8, base + 0xB8,
+                                base + 0x78, base + 0x1D0, *reinterpret_cast<void**>(base + 0x2C8),
+                                *reinterpret_cast<void**>(base + 0x40));
+    }
+};
+inline constexpr CreateContextFn CreateContext{};
+#else
 constexpr auto CreateContext = Core::RawFunc<
     /* addr = */ Red::AddressLib::QuestsSystem_CreateContext,
     /* type = */ void* (*)(Red::questIQuestsSystem* aPhase,
@@ -230,6 +260,7 @@ constexpr auto CreateContext = Core::RawFunc<
                            int8_t a4 /* = 0 */,
                            int32_t a5 /* = 1000000 */,
                            int32_t a6 /* = -1 */)>();
+#endif
 
 // constexpr auto StopPhase = Core::RawVFunc<
 //     /* addr = */ 0x210,
@@ -291,13 +322,15 @@ constexpr auto ExecuteNode = Core::RawFunc<
                              const Red::QuestNodeSocket& aInputSocket,
                              Red::DynArray<Red::QuestNodeSocket>& aOutputSockets)>();
 
+// Mac (R21): slot 0x128 (Windows + 8), confirmed by the recursive call in the body (vtable 0x70FD088, function 0x2CF7E58).
 constexpr auto ExecutePath = Core::RawVFunc<
     /* addr = */ 0x120,
     /* type = */ uint8_t (Red::questPhaseInstance::*)(Red::QuestContext& aContext,
                                                       const Red::QuestNodePath& aPhaseNodePath,
                                                       Red::QuestNodeID aInputNodeID,
                                                       Red::CName aInputSocketName,
-                                                      Red::DynArray<Red::QuestNodeSocket>& aOutputSockets)>();
+                                                      Red::DynArray<Red::QuestNodeSocket>& aOutputSockets),
+    /* verified = */ true>();
 }
 
 namespace Raw::QuestSocketDefinition

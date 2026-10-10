@@ -33,9 +33,26 @@ RED4EXT_ASSERT_OFFSET(VisualController, lock, 0x7C);
 
 namespace Raw::VisualController
 {
+#if defined(__APPLE__)
+// Mac ABI (R21): the JobHandle comes back through x8 (a3 moves to w1). LoadDependencies keeps the Windows call shape.
+constexpr auto LoadDependenciesNative = Core::RawFunc<
+    /* addr = */ Red::AddressLib::VisualController_LoadDependencies,
+    /* type = */ Red::JobHandle (*)(Red::VisualController* aController, uint8_t a3)>();
+
+struct LoadDependenciesFn
+{
+    uintptr_t operator()(Red::VisualController* aController, Red::JobHandle& aOut, uint8_t a3) const
+    {
+        aOut = LoadDependenciesNative(aController, a3);
+        return 0;
+    }
+};
+inline constexpr LoadDependenciesFn LoadDependencies{};
+#else
 constexpr auto LoadDependencies = Core::RawFunc<
     /* addr = */ Red::AddressLib::VisualController_LoadDependencies,
     /* type = */ uintptr_t (*)(Red::VisualController* aController, Red::JobHandle& aOut, uint8_t a3)>();
+#endif
 }
 
 namespace Raw::VisualControllerComponent
