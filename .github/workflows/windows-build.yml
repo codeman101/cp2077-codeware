@@ -20,6 +20,14 @@ jobs:
         with:
           xmake-version: latest
 
+      # CI-only: TiltedCore's prebuilt package expects mimalloc 2 (mi_malloc_size); xmake-repo now resolves mimalloc 3.5.3,
+      # which fails the link for upstream as well. Pin mimalloc 2 for this check only; xmake.lua in the repository is unchanged.
+      - name: Pin mimalloc 2 for TiltedCore (CI only)
+        shell: bash
+        run: |
+          sed -i '/^add_requires(/a add_requireconfs("tiltedcore.mimalloc", {override = true, version = "2.1.7"})' xmake.lua
+          grep -n "add_require" xmake.lua
+
       - name: Configure (release)
         run: xmake f -m release -y
 
