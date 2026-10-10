@@ -1,0 +1,31 @@
+name: Windows build check
+
+# Build check only: compiles the Windows target with upstream's xmake setup, so a macOS port branch can prove
+# that the shared code still builds for Windows. Not part of any pull request.
+
+on:
+  push:
+    branches: ["ci/**"]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Configure (release)
+        run: xmake f -m release -y
+
+      - name: Build
+        run: xmake -y -v
+
+      - name: Show the built DLL
+        shell: pwsh
+        run: Get-ChildItem -Recurse -Filter Codeware.dll build | Select-Object FullName, Length
