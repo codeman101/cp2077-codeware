@@ -205,6 +205,30 @@ DynamicEntitySystem spawns through `IEntityStubSystem::CreateStub`. Checked offl
 
 The next entries of that vtable are CancelStub 0x101FD7620, DeleteStub 0x101FD7734 (the SDK's Apple `DeleteStub(EntityStub*&)`), FindStub 0x101FD8D80.
 
+**DeleteStub 0x101FD7734 (R33, read only).** `(this x0, EntityStub** x1)`, no x8 result, so the SDK's Apple declaration matches:
+- it reads the stub (`ldr x8, [x1]`) and its entity id (`ldr x21, [x8, #0x40]`, `EntityStub::entityID`), then calls a virtual at
+  0x208 on the object at this+0xB0 with that id;
+- it takes the spin lock at this+0xB9, takes the stub out of the caller's pointer (`ldr x9, [x22]; str xzr, [x22]`: `*aStub` is
+  nulled, ownership moves to the stub system), and appends the pair (stub, entity id) to a 16-byte-element array at this+0x58
+  (grown through 0x1000286E8). The stub is not freed at once: the deletion is queued;
+- `componentStates` and `stubState` are not touched there. They go when the queued stub is destroyed: the stub destructor
+  0x101FD2C40 followed by `red::memory::Free<game::PoolGMPL_PS>` (the tail of DeleteStub does the same for a pair it could not
+  queue). Every call site of 0x101FD2C40 in the binary is followed by `Free<PoolGMPL_PS>`, so the Mac game keeps stubs in
+  PoolGMPL_PS. The SDK's `EntityStub::AllocatorType` (GMPL_Spawn, our R17 guess) does not match; Codeware never frees a stub
+  through it on the Mac (DynamicEntitySystem hands every stub to DeleteStub, and leaves the stubs of entities still spawned at
+  the world detach to the game; NOT_YET.md).
+- What the queue is drained by, and whether the drain waits for the entity's despawn, is not traced. Observed in game (R33):
+  deleting a workspot device about 0.1 s after the player's exit animation ended corrupted the heap (allocator crash about 1 s
+  later, run 20261010-165331); deleting devices that were never used (71 in run 20261010-163617) and deleting used devices 5 s
+  after the exit (run 20261010-171133) did not.
+
+The population system calls Codeware makes on this path, checked the same way (vtable at 0x106F36420, Mac slot = SDK
+declaration order after `IGameSystem::OnUninitialize` 0x1B0): `FindEntity` 0x10155C9D4 (slot 0x1B8, x8 result, a strong Handle:
+`ldaddal` +1 on the refcount it copies out), `IsSpawning` 0x10155CE0C (0x1D8), `RegisterEntity` 0x10155BF90 -> 0x10156BBA4 (0x1F8,
+reads the request's entity id at +0x00 and looks the stub up with `FindStub`), `RemoveEntity` 0x10155BF94 -> 0x10156C220 (0x200,
+`(this, uint32 id, uint64)`); none returns through x8 except FindEntity. `IPersistencySystem::RemoveDynamicEntityState` is
+0x103FF1E3C (vtable 0x10729E028 + 0x38, `(this, uint32 id)`, a hash-map erase).
+
 ## Struct field offsets (Core::OffsetPtr in src/Red)
 
 62 live offsets as the Mac compiler sees them (the Apple side of every `#if defined(__APPLE__)`). Evidence is `check-offsets.evidence.tsv` (R21 read-only matcher: the Windows function that uses the offset against its Mac twin, constructors, reflection). Status: CONFIRMED (evidence equals the offset in the code), MISMATCH, NO-EVIDENCE. Counts: CONFIRMED 55, NO-EVIDENCE 7. The SDK class layouts behind members that Codeware reads directly are guarded at build time by macos/MacLayoutGuard.cpp.

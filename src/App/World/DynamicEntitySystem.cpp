@@ -159,6 +159,37 @@ void App::DynamicEntitySystem::OnAfterWorldDetach()
     m_restored = false;
     m_persistentState.Reset();
 
+#if defined(__APPLE__)
+    // MAC-NOT-YET: an entity still spawned at the world detach keeps its stub in its state, and clearing the states would free
+    // that stub through the SDK's UniquePtr<EntityStub>, whose allocator (GMPL_Spawn) is our own R17 guess (SDK 57585d2ff), not
+    // upstream's. The Mac game frees stubs into PoolGMPL_PS (the stub destructor 0x101FD2C40 is followed by
+    // Free<PoolGMPL_PS> at every call site, DeleteStub 0x101FD7734 included), and the stub system may still track the stub by
+    // its ID (FindStub), so freeing it here could also be a double free. Until both are verified, hand the stubs over to
+    // nobody: a few 0x50-byte stubs leak per session end. The states are copied first so that each state's own lock is not
+    // taken under m_entityStatesLock (OnEntitySpawnerEvent takes them in the other order).
+    {
+        Core::Vector<DynamicEntityStatePtr> states;
+        {
+            std::shared_lock _(m_entityStatesLock);
+            states = m_entityStates;
+        }
+        uint32_t leaked = 0;
+        for (const auto& entityState : states)
+        {
+            if (auto entityStub = entityState->ExtractStub())
+            {
+                (void)entityStub.Release();
+                ++leaked;
+            }
+        }
+        if (leaked)
+        {
+            MAC_DIAG("[cw] DynamicEntitySystem world detach: %u stub(s) of entities still spawned left to the game (not freed)\n",
+                     leaked);
+        }
+    }
+#endif
+
     {
         std::scoped_lock _(m_entityStatesLock, m_entityTagsLock);
         m_entityStates.clear();
