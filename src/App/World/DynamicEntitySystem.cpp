@@ -160,13 +160,12 @@ void App::DynamicEntitySystem::OnAfterWorldDetach()
     m_persistentState.Reset();
 
 #if defined(__APPLE__)
-    // MAC-NOT-YET: an entity still spawned at the world detach keeps its stub in its state, and clearing the states would free
-    // that stub through the SDK's UniquePtr<EntityStub>, whose allocator (GMPL_Spawn) is our own R17 guess (SDK 57585d2ff), not
-    // upstream's. The Mac game frees stubs into PoolGMPL_PS (the stub destructor 0x101FD2C40 is followed by
-    // Free<PoolGMPL_PS> at every call site, DeleteStub 0x101FD7734 included), and the stub system may still track the stub by
-    // its ID (FindStub), so freeing it here could also be a double free. Until both are verified, hand the stubs over to
-    // nobody: a few 0x50-byte stubs leak per session end. The states are copied first so that each state's own lock is not
-    // taken under m_entityStatesLock (OnEntitySpawnerEvent takes them in the other order).
+    // MAC-NOT-YET: an entity still spawned at the world detach keeps its stub in its state. Codeware must not free it: the Mac game
+    // destroys stubs with its own destructor 0x101FD2C40 and frees them into PoolGMPL_PS (every call site, DeleteStub 0x101FD7734
+    // included), and the stub system may still track the stub by its ID (FindStub), so a free here could be a double free. R33
+    // released them here; since R34 the SDK gives EntityStub no allocator on the Mac and the state's holder (MacEntityStubRef) never
+    // frees, so this hand-off only makes the count visible. A few 0x50-byte stubs leak per session end. The states are copied first
+    // so that each state's own lock is not taken under m_entityStatesLock (OnEntitySpawnerEvent takes them in the other order).
     {
         Core::Vector<DynamicEntityStatePtr> states;
         {

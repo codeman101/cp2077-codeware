@@ -214,13 +214,19 @@ The next entries of that vtable are CancelStub 0x101FD7620, DeleteStub 0x101FD77
 - `componentStates` and `stubState` are not touched there. They go when the queued stub is destroyed: the stub destructor
   0x101FD2C40 followed by `red::memory::Free<game::PoolGMPL_PS>` (the tail of DeleteStub does the same for a pair it could not
   queue). Every call site of 0x101FD2C40 in the binary is followed by `Free<PoolGMPL_PS>`, so the Mac game keeps stubs in
-  PoolGMPL_PS. The SDK's `EntityStub::AllocatorType` (GMPL_Spawn, our R17 guess) does not match; Codeware never frees a stub
-  through it on the Mac (DynamicEntitySystem hands every stub to DeleteStub, and leaves the stubs of entities still spawned at
-  the world detach to the game; NOT_YET.md).
+  PoolGMPL_PS. The SDK's R17 `EntityStub::AllocatorType` (GMPL_Spawn) did not match; since R34 the Mac has none (below).
 - What the queue is drained by, and whether the drain waits for the entity's despawn, is not traced. Observed in game (R33):
   deleting a workspot device about 0.1 s after the player's exit animation ended corrupted the heap (allocator crash about 1 s
   later, run 20261010-165331); deleting devices that were never used (71 in run 20261010-163617) and deleting used devices 5 s
   after the exit (run 20261010-171133) did not.
+
+**EntityStub allocator (R34).** The SDK's R17 `EntityStub::AllocatorType = GMPL_SpawnAllocator` (SDK 57585d2ff, ours, never
+published) was a guess taken from `EntityStubToken`. The Mac binary says otherwise: all 94 call sites of the stub destructor 0x101FD2C40
+are followed within four instructions by `red::memory::Free<game::PoolGMPL_PS>` (the symbol stub 0x104A3C1A8). Upstream agrees:
+psiberx's RED4ext.SDK #213 ("Use UniquePtr for EntityStub", be4170d7) declares `GMPL_PSAllocator`. Since R34 the SDK fork declares
+GMPL_PS on Windows (upstream's value) and NO allocator on the Mac, so nothing can free a stub through the SDK there: the game's own
+destructor may do more than the SDK's implicit one, and the stub system keeps stubs by id. Codeware holds a stub in
+`MacEntityStubRef` (src/App/World/DynamicEntityState.hpp), which hands it to `DeleteStub` or leaves it to the game, never frees it.
 
 The population system calls Codeware makes on this path, checked the same way (vtable at 0x106F36420, Mac slot = SDK
 declaration order after `IGameSystem::OnUninitialize` 0x1B0): `FindEntity` 0x10155C9D4 (slot 0x1B8, x8 result, a strong Handle:
