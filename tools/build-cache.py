@@ -26,6 +26,7 @@ failed compile). Outputs:
   <out-cache>                  the cache, only when the compile succeeded
   <out-cache>.manifest.json    sha256 of every input file, the base cache, the composed Codeware bundles, the result
   <out-cache>.errors.txt       the compiler's error text and the error lines of the log, empty on success
+  <out-cache>.lint.txt         R34: the INVALID_TEMP lint's findings (reds_invalid_temp.py; warnings only, --no-lint skips it)
 Exit code: 0 compiled, 1 compile errors, 2 usage or input problem.
 """
 import argparse
@@ -98,6 +99,7 @@ def main():
                          'Codeware\'s), and stage them as scripts/NAME; replaces that plugin\'s Scripts folder (repeatable)')
     ap.add_argument('--extra-scripts', default=os.path.join(HERE, 'diag-scripts'),
                     help='macOS self-test scripts (tools/diag-scripts), staged as scripts/CodewareMacDiag; pass an empty string to leave them out')
+    ap.add_argument('--no-lint', action='store_true', help='skip the INVALID_TEMP lint (R34; warnings only, written to <out-cache>.lint.txt)')
     ap.add_argument('--dry-run', action='store_true', help='stage the inputs, print FINGERPRINT=<sha256> and exit without compiling')
     a = ap.parse_args()
 
@@ -211,6 +213,25 @@ def main():
         print('FINGERPRINT=' + fingerprint)
         return 0
 
+    # R34: the INVALID_TEMP lint (reds_invalid_temp.py next to this file) over the staged sources. Warnings only: it never changes the
+    # inputs, the fingerprint or the result. A field read straight off a call's struct result, or an array intrinsic over a call result,
+    # reads an unfilled temporary in the script VM (0 or stale memory on the Mac; upstream redscript's INVALID_TEMP).
+    lint = {'certain': 0, 'possible': 0, 'report': None}
+    if not a.no_lint:
+        try:
+            sys.path.insert(0, HERE)
+            import reds_invalid_temp
+            findings = reds_invalid_temp.scan_tree(os.path.join(r6, 'scripts'))
+            lint['certain'] = sum(1 for f in findings if f['kind'] == 'certain')
+            lint['possible'] = len(findings) - lint['certain']
+            os.makedirs(os.path.dirname(out_cache), exist_ok=True)
+            lint['report'] = out_cache + '.lint.txt'
+            with open(lint['report'], 'w') as f:
+                for line in reds_invalid_temp.format_findings(findings, os.path.join(r6, 'scripts')):
+                    f.write(line + '\n')
+        except Exception as e:  # the lint must never break a build
+            lint['error'] = str(e)
+
     # Compile through scc_nopopup.py.
     tmp_out = os.path.join(staging, 'final.redscripts.new')
     if os.path.exists(tmp_out):
@@ -248,6 +269,7 @@ def main():
         'inputs': sorted(inputs, key=lambda e: e['path']),
         'excluded': sorted(excluded) + ['Codeware-src/' + e for e in src_excl],
         'exclude_file': a.exclude if os.path.exists(a.exclude) else None,
+        'lint_invalid_temp': lint,
         'result': {
             'ok': ok,
             'cache': out_cache if ok else None,
@@ -267,6 +289,9 @@ def main():
 
     print('build-cache: %d input files, %d excluded, base cache %s%s' % (
         len(inputs), len(excluded) + len(src_excl), base_sha[:12], '' if base_sha == STOCK_CACHE_SHA256 else ' (NOT the stock cache)'))
+    if lint['certain'] or lint['possible']:
+        print('build-cache: lint: %d INVALID_TEMP read(s), %d possible, see %s (warnings only)' % (lint['certain'], lint['possible'],
+                                                                                           lint['report']))
     if ok:
         print('build-cache: compiled %s sha256=%s (%d bytes)' % (out_cache, manifest['result']['cache_sha256'],
                                                                  manifest['result']['cache_bytes']))
