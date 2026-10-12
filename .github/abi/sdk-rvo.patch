@@ -1,0 +1,85 @@
+From 5557674793fefd5fdb5423d5e481115603a95ecb Mon Sep 17 00:00:00 2001
+From: codeman101 <16909824+codeman101@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 10:45:45 -0700
+Subject: [PATCH] Return results by value from six game system virtuals
+
+IDynamicEntityIDSystem::GetNextTransientID and GetNextPersistableID, IPopulationSystem::FindEntity, IEntityStubSystem::CreateStub
+and RestoreStub, and ITransactionSystem::GetItemAppearance were declared with the result as a reference out-parameter. The game
+returns these results by value. On Windows x64 a member function that returns a class type receives the result pointer right after
+`this`, which is exactly where the out-parameter was, so the generated calls are unchanged. Declaring the real return types makes the
+headers correct for compilers whose ABI returns class types differently (for example clang on arm64, which uses a separate result
+register), without any platform branch.
+
+Callers change from `system->FindEntity(entity, id)` to `auto entity = system->FindEntity(id)`, and likewise for the others.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../Scripting/Natives/gameIDynamicEntityIDSystem.hpp      | 4 ++--
+ .../RED4ext/Scripting/Natives/gameIEntityStubSystem.hpp   | 8 ++++----
+ .../RED4ext/Scripting/Natives/gameIPopulationSystem.hpp   | 2 +-
+ .../RED4ext/Scripting/Natives/gameITransactionSystem.hpp  | 2 +-
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/include/RED4ext/Scripting/Natives/gameIDynamicEntityIDSystem.hpp b/include/RED4ext/Scripting/Natives/gameIDynamicEntityIDSystem.hpp
+index e492955bd..861584375 100644
+--- a/include/RED4ext/Scripting/Natives/gameIDynamicEntityIDSystem.hpp
++++ b/include/RED4ext/Scripting/Natives/gameIDynamicEntityIDSystem.hpp
+@@ -13,8 +13,8 @@ struct IDynamicEntityIDSystem : IGameSystem
+     static constexpr const char* NAME = "gameIDynamicEntityIDSystem";
+     static constexpr const char* ALIAS = NAME;
+ 
+-    virtual void* GetNextTransientID(ent::EntityID& aOut) = 0;   // 1A8
+-    virtual void* GetNextPersistableID(ent::EntityID& aOut) = 0; // 1B0
++    virtual ent::EntityID GetNextTransientID() = 0;              // 1A8
++    virtual ent::EntityID GetNextPersistableID() = 0;            // 1B0
+     virtual void sub_1B8() = 0;                                  // 1B8
+     virtual void sub_1C0() = 0;                                  // 1C0
+     virtual void sub_1C8() = 0;                                  // 1C8
+diff --git a/include/RED4ext/Scripting/Natives/gameIEntityStubSystem.hpp b/include/RED4ext/Scripting/Natives/gameIEntityStubSystem.hpp
+index e8e4927ad..4dbf35f69 100644
+--- a/include/RED4ext/Scripting/Natives/gameIEntityStubSystem.hpp
++++ b/include/RED4ext/Scripting/Natives/gameIEntityStubSystem.hpp
+@@ -126,10 +126,10 @@ struct IEntityStubSystem : IGameSystem
+     static constexpr const char* NAME = "gameIEntityStubSystem";
+     static constexpr const char* ALIAS = NAME;
+ 
+-    virtual void* CreateStub(EntityStubTokenPtr& aToken, EntityStubCreateRequest& aRequest,
+-                             EntityStubCallback&& aCallback) = 0; // 1B0
+-    virtual void* RestoreStub(EntityStubTokenPtr& aToken, EntityStubRestoreRequest& aRequest,
+-                              EntityStubCallback&& aCallback) = 0; // 1B8
++    virtual EntityStubTokenPtr CreateStub(EntityStubCreateRequest& aRequest,
++                                          EntityStubCallback&& aCallback) = 0; // 1B0
++    virtual EntityStubTokenPtr RestoreStub(EntityStubRestoreRequest& aRequest,
++                                           EntityStubCallback&& aCallback) = 0; // 1B8
+     virtual void CancelStub(EntityStubTokenPtr& aToken) = 0;       // 1C0
+     virtual void DeleteStub(UniquePtr<EntityStub>&& aStub) = 0;    // 1C8
+     virtual EntityStub* FindStub(EntityID aEntityID) = 0;          // 1D0
+diff --git a/include/RED4ext/Scripting/Natives/gameIPopulationSystem.hpp b/include/RED4ext/Scripting/Natives/gameIPopulationSystem.hpp
+index a784015f3..a63de246b 100644
+--- a/include/RED4ext/Scripting/Natives/gameIPopulationSystem.hpp
++++ b/include/RED4ext/Scripting/Natives/gameIPopulationSystem.hpp
+@@ -40,7 +40,7 @@ struct IPopulationSystem : IGameSystem
+     static constexpr const char* NAME = "gameIPopulationSystem";
+     static constexpr const char* ALIAS = NAME;
+ 
+-    virtual void* FindEntity(Handle<Entity>& aOut, uint32_t aDynamicEntityID) = 0; // 1A8
++    virtual Handle<Entity> FindEntity(uint32_t aDynamicEntityID) = 0;              // 1A8
+     virtual void sub_1B0() = 0;                                                    // 1B0
+     virtual void sub_1B8() = 0;                                                    // 1B8
+     virtual void sub_1C0() = 0;                                                    // 1C0
+diff --git a/include/RED4ext/Scripting/Natives/gameITransactionSystem.hpp b/include/RED4ext/Scripting/Natives/gameITransactionSystem.hpp
+index 7396d68f3..545e6c258 100644
+--- a/include/RED4ext/Scripting/Natives/gameITransactionSystem.hpp
++++ b/include/RED4ext/Scripting/Natives/gameITransactionSystem.hpp
+@@ -22,7 +22,7 @@ struct ITransactionSystem : IGameSystem
+     virtual void sub_1B8() = 0;                                                                                  // 1B8
+     virtual void sub_1C0() = 0;                                                                                  // 1C0
+     virtual void sub_1C8() = 0;                                                                                  // 1C8
+-    virtual CName* GetItemAppearance(CName& aAppearance, IScriptable* aOwner, const ItemID& aItemID) = 0;        // 1D0
++    virtual CName GetItemAppearance(IScriptable* aOwner, const ItemID& aItemID) = 0;                             // 1D0
+     virtual void ResetItemAppearance(IScriptable* aOwner, const ItemID& aItemID) = 0;                            // 1D8
+     virtual void sub_1E0() = 0;                                                                                  // 1E0
+     virtual void sub_1E8() = 0;                                                                                  // 1E8
+-- 
+2.54.0 (Apple Git-157)
+

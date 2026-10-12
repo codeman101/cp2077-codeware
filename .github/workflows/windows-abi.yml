@@ -1,0 +1,85 @@
+name: Windows ABI check
+
+# Proof for the upstream pull requests that change how results are declared (by value instead of an out-parameter): builds Codeware
+# for Windows twice, the base commit and the change, with MSVC assembly listings (/FAs), and compares the functions that make the
+# changed calls. Not part of any pull request. The change branches must be on this fork.
+
+on:
+  push:
+    branches: ["ci/abi-**"]
+  workflow_dispatch:
+
+jobs:
+  abi:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: raw-results
+            change: pr/upstream/rvo-raw-results
+            sdk_patch: ""
+            functions: "GetHitObject,GetHitEntity,SaveToFile"
+          - name: sdk-virtuals
+            change: pr/upstream/sdk-virtual-callers
+            sdk_patch: ".github/abi/sdk-rvo.patch"
+            functions: "SpawnFromEntityState,CreateEntityState,RestoreEntityState,GetEntity,GetTagged,ProcessActivity,SpawnEntity"
+    steps:
+      - name: This branch (the scripts)
+        uses: actions/checkout@v4
+        with:
+          path: ci
+
+      - name: Base (upstream main)
+        uses: actions/checkout@v4
+        with:
+          repository: psiberx/cp2077-codeware
+          ref: 613a1cb830ecf33508ffca839d3ea631073504ef # upstream main, the base of the change branches
+          path: base
+          submodules: recursive
+
+      - name: Change
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.change }}
+          path: change
+          submodules: recursive
+
+      - name: Apply the RED4ext.SDK change to the vendored SDK of the change build
+        if: matrix.sdk_patch != ''
+        shell: bash
+        run: git -C change/vendor/RED4ext.SDK apply "$GITHUB_WORKSPACE/ci/${{ matrix.sdk_patch }}"
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      # Same CI-only pin as windows-build.yml (TiltedCore's prebuilt package needs mimalloc 2).
+      - name: Pin mimalloc 2 for TiltedCore (CI only)
+        shell: bash
+        run: |
+          for d in base change; do
+            sed -i '/^add_requires(/a add_requireconfs("tiltedcore.mimalloc", {override = true, version = "2.1.7"})' $d/xmake.lua
+          done
+
+      - name: Build both with assembly listings
+        shell: pwsh
+        run: |
+          foreach ($d in @("base", "change")) {
+            $asm = Join-Path $env:GITHUB_WORKSPACE "asm-$d\"
+            New-Item -ItemType Directory -Force $asm | Out-Null
+            Push-Location $d
+            xmake f -m release -y --cxflags="/FAs /Fa$asm"
+            xmake -y
+            Pop-Location
+          }
+
+      - name: Compare the functions that make the changed calls
+        shell: bash
+        run: |
+          python ci/.github/abi/compare.py asm-base asm-change "${{ matrix.functions }}" | tee abi-${{ matrix.name }}.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: abi-${{ matrix.name }}
+          path: abi-${{ matrix.name }}.txt
