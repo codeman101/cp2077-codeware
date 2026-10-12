@@ -1213,17 +1213,6 @@ struct ClassExpansion
 
             auto* rtti = CRTTISystem::Get();
             auto* type = reinterpret_cast<Descriptor*>(rtti->GetClass(name));
-#if defined(__APPLE__)
-            // Generated classes are stored under NAME (gameJournalManager) or
-            // ALIAS (JournalManager). Try both before giving up.
-            if (!type)
-            {
-                if constexpr (Detail::HasGeneratedTypeName<TClass>)
-                {
-                    type = reinterpret_cast<Descriptor*>(rtti->GetClass(CName(TClass::ALIAS)));
-                }
-            }
-#endif
 
             if (!type)
                 return;
