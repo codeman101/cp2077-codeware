@@ -694,6 +694,9 @@ private:
 
     inline static TRet Run(TContext* aSelf, TArgs... aArgs)
     {
+#if defined(__APPLE__)
+        Core::HookHits::Bump(s_hits, reinterpret_cast<const void*>(GetHandle()));
+#endif
         if constexpr (TFlow == HookFlow::Original)
         {
             if constexpr (Traits::IsOriginal)
@@ -771,6 +774,9 @@ private:
     }
 
     static inline Wrapper s_callback;
+#if defined(__APPLE__)
+    static inline std::atomic<uint64_t> s_hits{0};
+#endif
     static inline Original s_original;
 };
 }
