@@ -17,14 +17,12 @@ Red::ClassLocator<Red::ink::WidgetLogicController> s_logicControllerType;
 
 void App::WidgetSpawningService::OnBootstrap()
 {
+    Hook<Raw::InkWidgetLibrary::SpawnFromLocal>(&OnSpawnLocal).OrThrow();
+    Hook<Raw::InkWidgetLibrary::SpawnFromExternal>(&OnSpawnExternal).OrThrow();
 #if defined(__APPLE__)
-    Hook<Raw::InkWidgetLibrary::SpawnFromLocalNative>(&OnSpawnLocalMac).OrThrow();
-    Hook<Raw::InkWidgetLibrary::SpawnFromExternalNative>(&OnSpawnExternalMac).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromLocal>(&OnAsyncSpawnLocalMac).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromExternal>(&OnAsyncSpawnExternalMac).OrThrow();
 #else
-    Hook<Raw::InkWidgetLibrary::SpawnFromLocal>(&OnSpawnLocal).OrThrow();
-    Hook<Raw::InkWidgetLibrary::SpawnFromExternal>(&OnSpawnExternal).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromLocal>(&OnAsyncSpawnLocal).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromExternal>(&OnAsyncSpawnExternal).OrThrow();
 #endif
@@ -33,80 +31,14 @@ void App::WidgetSpawningService::OnBootstrap()
 
 void App::WidgetSpawningService::OnShutdown()
 {
-#if defined(__APPLE__)
-    Unhook<Raw::InkWidgetLibrary::SpawnFromLocalNative>();
-    Unhook<Raw::InkWidgetLibrary::SpawnFromExternalNative>();
-#else
     Unhook<Raw::InkWidgetLibrary::SpawnFromLocal>();
     Unhook<Raw::InkWidgetLibrary::SpawnFromExternal>();
-#endif
     Unhook<Raw::InkWidgetLibrary::AsyncSpawnFromLocal>();
     Unhook<Raw::InkWidgetLibrary::AsyncSpawnFromExternal>();
     Unhook<Raw::InkSpawner::FinishAsyncSpawn>();
 }
 
 #if defined(__APPLE__)
-Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnLocalMac(
-    Red::ink::WidgetLibraryResource& aLibrary, Red::CName aItemName)
-{
-    static auto& counter = Mac::HookCount("InkWidgetLibrary_SpawnFromLocal");
-    Mac::Hit(counter);
-
-    Red::Handle<Red::ink::WidgetLibraryItemInstance> instance;
-    OnSpawnLocal(aLibrary, instance, aItemName);
-
-    if (instance && Mac::R20Once("spawnLocal"))
-    {
-        MacCheckSpawnedInstance(instance, "SpawnFromLocal");
-    }
-    return instance;
-}
-
-Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnExternalMac(
-    Red::ink::WidgetLibraryResource& aLibrary, Red::ResourcePath aExternalPath, Red::CName aItemName)
-{
-    static auto& counter = Mac::HookCount("InkWidgetLibrary_SpawnFromExternal");
-    Mac::Hit(counter);
-
-    Red::Handle<Red::ink::WidgetLibraryItemInstance> instance;
-    OnSpawnExternal(aLibrary, instance, aExternalPath, aItemName);
-
-    // R28. "Item:Controller" names with an external library. On Windows the game's SpawnFromExternal reaches the hooked SpawnFromLocal of the
-    // external library, which splits the name, injects the controller and dispatches the InkWidget/Spawn event (OnSpawnLocal). The Mac native does
-    // not go through that hooked function, so the whole name finds no item and the spawn fails (Equipment-EX's wardrobe screen,
-    // "Root:EquipmentEx.WardrobeScreenController", did not open) and no spawn event is dispatched. Same steps as OnSpawnLocal here: try the whole
-    // name first, then the name without the controller and inject the controller; then the event.
-    Red::CName eventItemName = aItemName;
-
-    if (!instance)
-    {
-        const auto* itemNameStr = aItemName.ToString();
-        const auto* controllerSep = itemNameStr ? strchr(itemNameStr, ControllerSeparator) : nullptr;
-
-        if (controllerSep)
-        {
-            eventItemName = Red::CName(itemNameStr, controllerSep - itemNameStr);
-            OnSpawnExternal(aLibrary, instance, aExternalPath, eventItemName);
-
-            if (instance)
-            {
-                InjectController(instance, controllerSep + 1);
-            }
-        }
-    }
-
-    if (instance && s_widgetSpawnEventEnabled)
-    {
-        CallbackSystem::Get()->DispatchNativeEvent<inkWidgetSpawnEvent>(WidgetSpawnEventName, aExternalPath, eventItemName, instance);
-    }
-
-    if (instance && Mac::R20Once("spawnExternal"))
-    {
-        MacCheckSpawnedInstance(instance, "SpawnFromExternal");
-    }
-    return instance;
-}
-
 bool App::WidgetSpawningService::OnAsyncSpawnLocalMac(Red::ink::WidgetLibraryResource& aLibrary,
                                                       Red::InkSpawningInfo& aSpawningInfo,
                                                       Red::CName aItemName,
@@ -167,13 +99,17 @@ void App::WidgetSpawningService::MacCheckSpawnedInstance(const Red::Handle<Red::
 }
 #endif
 
-uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
-                                                   Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
-                                                   Red::CName aItemName)
+Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnLocal(
+    Red::ink::WidgetLibraryResource* aLibrary, Red::CName aItemName)
 {
-    auto result = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aInstance, aItemName);
+#if defined(__APPLE__)
+    static auto& counter = Mac::HookCount("InkWidgetLibrary_SpawnFromLocal");
+    Mac::Hit(counter);
+#endif
 
-    if (!aInstance)
+    auto instance = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aItemName);
+
+    if (!instance)
     {
         auto* itemNameStr = aItemName.ToString();
         auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
@@ -181,32 +117,80 @@ uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResour
         if (controllerSep)
         {
             aItemName = Red::CName(itemNameStr, controllerSep - itemNameStr);
-            Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aInstance, aItemName);
+            instance = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aItemName);
 
-            if (aInstance)
+            if (instance)
             {
-                InjectController(aInstance, controllerSep + 1);
+                InjectController(instance, controllerSep + 1);
             }
         }
     }
 
-    if (s_widgetSpawnEventEnabled && aInstance)
+    if (s_widgetSpawnEventEnabled && instance)
     {
-        CallbackSystem::Get()->DispatchNativeEvent<inkWidgetSpawnEvent>(WidgetSpawnEventName, aLibrary.path, aItemName,
-                                                                        aInstance);
+        CallbackSystem::Get()->DispatchNativeEvent<inkWidgetSpawnEvent>(WidgetSpawnEventName, aLibrary->path, aItemName,
+                                                                        instance);
     }
 
-    return result;
+#if defined(__APPLE__)
+    if (instance && Mac::R20Once("spawnLocal"))
+    {
+        MacCheckSpawnedInstance(instance, "SpawnFromLocal");
+    }
+#endif
+
+    return instance;
 }
 
-uintptr_t App::WidgetSpawningService::OnSpawnExternal(Red::ink::WidgetLibraryResource& aLibrary,
-                                                      Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
-                                                      Red::ResourcePath aExternalPath,
-                                                      Red::CName aItemName)
+Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnExternal(
+    Red::ink::WidgetLibraryResource* aLibrary, Red::ResourcePath aExternalPath, Red::CName aItemName)
 {
-    InjectDependency(aLibrary, aExternalPath);
+#if defined(__APPLE__)
+    static auto& counter = Mac::HookCount("InkWidgetLibrary_SpawnFromExternal");
+    Mac::Hit(counter);
+#endif
 
-    return Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aInstance, aExternalPath, aItemName);
+    InjectDependency(*aLibrary, aExternalPath);
+
+    auto instance = Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aExternalPath, aItemName);
+
+#if defined(__APPLE__)
+    // R28. "Item:Controller" names with an external library. On Windows the game's SpawnFromExternal reaches the hooked SpawnFromLocal of the
+    // external library, which splits the name, injects the controller and dispatches the InkWidget/Spawn event (OnSpawnLocal). The Mac native does
+    // not go through that hooked function, so the whole name finds no item and the spawn fails (Equipment-EX's wardrobe screen,
+    // "Root:EquipmentEx.WardrobeScreenController", did not open) and no spawn event is dispatched. Same steps as OnSpawnLocal here: try the whole
+    // name first, then the name without the controller and inject the controller; then the event.
+    Red::CName eventItemName = aItemName;
+
+    if (!instance)
+    {
+        const auto* itemNameStr = aItemName.ToString();
+        const auto* controllerSep = itemNameStr ? strchr(itemNameStr, ControllerSeparator) : nullptr;
+
+        if (controllerSep)
+        {
+            eventItemName = Red::CName(itemNameStr, controllerSep - itemNameStr);
+            instance = Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aExternalPath, eventItemName);
+
+            if (instance)
+            {
+                InjectController(instance, controllerSep + 1);
+            }
+        }
+    }
+
+    if (instance && s_widgetSpawnEventEnabled)
+    {
+        CallbackSystem::Get()->DispatchNativeEvent<inkWidgetSpawnEvent>(WidgetSpawnEventName, aExternalPath, eventItemName, instance);
+    }
+
+    if (instance && Mac::R20Once("spawnExternal"))
+    {
+        MacCheckSpawnedInstance(instance, "SpawnFromExternal");
+    }
+#endif
+
+    return instance;
 }
 
 #if !defined(__APPLE__)

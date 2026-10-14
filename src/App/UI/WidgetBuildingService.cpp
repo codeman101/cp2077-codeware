@@ -93,8 +93,7 @@ void App::WidgetBuildingService::OnInitializeController(Red::inkLogicController*
             if (widget && widget->parentWidget.Lock())
             {
                 Mac::Hit(tries);
-                Red::Handle<Red::inkLayerProxy> proxy;
-                Raw::inkWidget::GetLayer(widget.instance, proxy);
+                auto proxy = Raw::inkWidget::GetLayer(widget.instance);
                 auto layer = proxy ? proxy->layer.Lock() : Red::Handle<Red::inkLayer>();
                 static auto* layerType = Red::GetClass("inkLayer");
                 if (layer && layer->GetType() && layerType && layer->GetType()->IsA(layerType))
@@ -125,7 +124,7 @@ bool App::WidgetBuildingService::AttachWidgetTree(const Red::Handle<Red::inkWidg
     if (layerProxy)
         return true;
 
-    Raw::inkWidget::GetLayer(aWidget, layerProxy);
+    layerProxy = Raw::inkWidget::GetLayer(aWidget);
 
     if (!layerProxy)
         return false;

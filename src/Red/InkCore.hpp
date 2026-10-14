@@ -22,26 +22,11 @@ namespace Raw::inkWidget
 {
 using EventManager = Core::OffsetPtr<0x50, Red::EventManager>;
 
-#if defined(__APPLE__)
-// Mac ABI (R20): the layer proxy comes back through x8 and the out argument is gone. The function also caches the proxy in
-// widget+0x148 itself (the Windows one does too). GetLayer keeps the Windows call shape for WidgetBuildingService.
-constexpr auto GetLayerNative = Core::RawFunc<
-    /* addr = */ Red::AddressLib::InkWidget_GetLayer,
-    /* type = */ Red::Handle<Red::inkLayerProxy> (*)(Red::inkWidget* aWidget)>();
-
-struct GetLayerFn
-{
-    void operator()(Red::inkWidget* aWidget, Red::Handle<Red::inkLayerProxy>& aProxy) const
-    {
-        aProxy = GetLayerNative(aWidget);
-    }
-};
-inline constexpr GetLayerFn GetLayer{};
-#else
+// The layer proxy comes back by value: through x8 on the Mac, through the result address after "this" in the Windows build.
+// The function also caches the proxy in widget+0x148 itself.
 constexpr auto GetLayer = Core::RawFunc<
     /* addr = */ Red::AddressLib::InkWidget_GetLayer,
-    /* type = */ void (*)(Red::inkWidget* aWidget, Red::Handle<Red::inkLayerProxy>& aProxy)>();
-#endif
+    /* type = */ Red::Handle<Red::inkLayerProxy> (Red::inkWidget::*)()>();
 
 constexpr auto SetLayer = Core::RawFunc<
     /* addr = */ Red::AddressLib::InkWidget_SetLayer,

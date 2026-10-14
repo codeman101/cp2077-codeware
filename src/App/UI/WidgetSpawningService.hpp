@@ -21,13 +21,11 @@ protected:
     void OnBootstrap() override;
     void OnShutdown() override;
 
-    static uintptr_t OnSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
-                                  Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
-                                  Red::CName aItemName);
-    static uintptr_t OnSpawnExternal(Red::ink::WidgetLibraryResource& aLibrary,
-                                     Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
-                                     Red::ResourcePath aExternalPath,
-                                     Red::CName aItemName);
+    static Red::Handle<Red::ink::WidgetLibraryItemInstance> OnSpawnLocal(Red::ink::WidgetLibraryResource* aLibrary,
+                                                                         Red::CName aItemName);
+    static Red::Handle<Red::ink::WidgetLibraryItemInstance> OnSpawnExternal(Red::ink::WidgetLibraryResource* aLibrary,
+                                                                            Red::ResourcePath aExternalPath,
+                                                                            Red::CName aItemName);
 #if !defined(__APPLE__)
     static bool OnAsyncSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
                                   Red::InkSpawningInfo& aSpawningInfo,
@@ -41,13 +39,8 @@ protected:
                                    Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance);
 
 #if defined(__APPLE__)
-    // R20. The Mac ABI forms of the four spawn hooks (see src/Red/InkLibrary.hpp): the Handle comes back through x8, and the
-    // two Async* functions carry one more bool. The Windows-shaped handlers above hold the logic.
-    static Red::Handle<Red::ink::WidgetLibraryItemInstance> OnSpawnLocalMac(Red::ink::WidgetLibraryResource& aLibrary,
-                                                                            Red::CName aItemName);
-    static Red::Handle<Red::ink::WidgetLibraryItemInstance> OnSpawnExternalMac(Red::ink::WidgetLibraryResource& aLibrary,
-                                                                               Red::ResourcePath aExternalPath,
-                                                                               Red::CName aItemName);
+    // R20. The Mac ABI forms of the two async spawn hooks (see src/Red/InkLibrary.hpp): they carry one more bool than the
+    // Windows ones.
     static bool OnAsyncSpawnLocalMac(Red::ink::WidgetLibraryResource& aLibrary,
                                      Red::InkSpawningInfo& aSpawningInfo,
                                      Red::CName aItemName,
