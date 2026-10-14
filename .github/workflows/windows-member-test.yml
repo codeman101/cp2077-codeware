@@ -1,0 +1,70 @@
+name: Windows member call test
+
+# Runtime ABI test for the member-pointer RawFunc change (pr/upstream/member-raw-calls): compiles .github/abi/member-test/
+# member_call_test.cpp with MSVC for x64 against lib/ of the change branch and runs it. The test calls real noinline member functions
+# of a class through member RawFuncs, hooks them through HookHandler with a fake hooking driver, and calls the detours the way the
+# game would, as member functions. Not part of any pull request. The change branch must be on this fork.
+
+on:
+  push:
+    branches: ["ci/abi-**"]
+  workflow_dispatch:
+
+jobs:
+  member-test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: O2
+            opt: "/O2"
+          - name: Od
+            opt: "/Od"
+    steps:
+      - name: This branch (the test)
+        uses: actions/checkout@v4
+        with:
+          path: ci
+
+      - name: Change (only lib/ is needed)
+        uses: actions/checkout@v4
+        with:
+          ref: pr/upstream/member-raw-calls
+          path: change
+          sparse-checkout: lib
+
+      - name: Compile with MSVC (x64)
+        shell: pwsh
+        env:
+          OPT: ${{ matrix.opt }}
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $vcvars = Join-Path $vs "VC\Auxiliary\Build\vcvars64.bat"
+          New-Item -ItemType Directory -Force asm | Out-Null
+          # A batch file keeps the quoting out of the way.
+          @"
+          @echo off
+          call "$vcvars" >nul
+          cl 2>&1 | findstr /c:Version
+          cl /nologo /std:c++20 $env:OPT /EHsc /W3 /FAs /Fa.\asm\ /I ci\.github\abi\member-test\standins /I change\lib ci\.github\abi\member-test\member_call_test.cpp /Fe:member_call_test.exe
+          exit /b %errorlevel%
+          "@ | Set-Content -Path build-member-test.bat -Encoding ascii
+          cmd /c build-member-test.bat
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run
+        shell: pwsh
+        run: |
+          .\member_call_test.exe > member-test-${{ matrix.name }}.txt 2>&1
+          $code = $LASTEXITCODE
+          Get-Content member-test-${{ matrix.name }}.txt
+          exit $code
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: member-test-${{ matrix.name }}
+          path: |
+            member-test-${{ matrix.name }}.txt
+            asm/

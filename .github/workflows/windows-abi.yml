@@ -2,7 +2,9 @@ name: Windows ABI check
 
 # Proof for the upstream pull requests that change how results are declared (by value instead of an out-parameter): builds Codeware
 # for Windows twice, the base commit and the change, with MSVC assembly listings (/FAs), and compares the functions that make the
-# changed calls. Not part of any pull request. The change branches must be on this fork.
+# changed calls. Not part of any pull request. The change branches must be on this fork. Every entry names its own base commit.
+# Entries whose change renames the functions that make the calls (a signature change gives them new decorated names) also list
+# them side by side with pair.py.
 
 on:
   push:
@@ -17,17 +19,38 @@ jobs:
       matrix:
         include:
           - name: raw-results
+            base: 613a1cb830ecf33508ffca839d3ea631073504ef # upstream main when the change branch was made
             change: pr/upstream/rvo-raw-results
             sdk_patch: ""
             functions: "GetHitObject,GetHitEntity,SaveToFile"
             offsets: ""
           - name: sdk-virtuals
+            base: 613a1cb830ecf33508ffca839d3ea631073504ef # upstream main when the change branch was made
             change: pr/upstream/sdk-virtual-callers
             sdk_patch: ".github/abi/sdk-rvo.patch"
             functions: "SpawnFromEntityState,CreateEntityState,RestoreEntityState,GetEntity,GetTagged,ProcessActivity,SpawnEntity"
             # vtable offsets of the six changed virtuals: IDynamicEntityIDSystem 1A8/1B0, IPopulationSystem 1A8,
             # IEntityStubSystem 1B0/1B8, ITransactionSystem 1D0
             offsets: "1A8,1B0,1B8,1D0"
+          - name: member-raw
+            base: a88e8aa5f58451e4d689fba45c9ac0e3a986109b # upstream main, the base of pr/upstream/member-raw-calls
+            change: pr/upstream/member-raw-calls
+            sdk_patch: ""
+            # SpawnFromLocal, SpawnFromExternal and GetLayer change from free function declarations (object first, result
+            # out-parameter second) to member function declarations. The callers get new signatures, so their decorated
+            # names change and pair.py lists them; compare.py only reports them as present in one build.
+            functions: "OnSpawnLocal,OnSpawnExternal,AttachWidgetTree,AfterReparentFromScript,AfterAddChildFromScript"
+            offsets: ""
+            # label::base pattern::change pattern, ';' separated. The detours: Handle in the base build (free function raw), the
+            # one with the result address in the change build (member raw, MSVC x64 shape).
+            pairs: >-
+              OnSpawnLocal::OnSpawnLocal@WidgetSpawningService;
+              OnSpawnExternal::OnSpawnExternal@WidgetSpawningService;
+              AttachWidgetTree::AttachWidgetTree@WidgetBuildingService;
+              AfterReparentFromScript::AfterReparentFromScript@WidgetBuildingService;
+              AfterAddChildFromScript::AfterAddChildFromScript@WidgetBuildingService;
+              DetourSpawnFromLocal::?Handle@?$HookHandler+WidgetLibraryResource+WidgetLibraryItemInstance+!ResourcePath+!InkSpawningInfo::?HandleWithResult@?$HookHandler+WidgetLibraryResource+WidgetLibraryItemInstance+!ResourcePath+!InkSpawningInfo;
+              DetourSpawnFromExternal::?Handle@?$HookHandler+WidgetLibraryResource+WidgetLibraryItemInstance+ResourcePath+!InkSpawningInfo::?HandleWithResult@?$HookHandler+WidgetLibraryResource+WidgetLibraryItemInstance+ResourcePath+!InkSpawningInfo
     steps:
       - name: This branch (the scripts)
         uses: actions/checkout@v4
@@ -38,7 +61,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: psiberx/cp2077-codeware
-          ref: 613a1cb830ecf33508ffca839d3ea631073504ef # upstream main, the base of the change branches
+          ref: ${{ matrix.base }}
           path: base
           submodules: recursive
 
@@ -83,6 +106,14 @@ jobs:
         run: |
           python ci/.github/abi/compare.py asm-base asm-change "${{ matrix.functions }}" | tee abi-${{ matrix.name }}.txt
 
+      - name: Compare the functions whose signatures the change altered, side by side
+        if: matrix.pairs != ''
+        shell: bash
+        env:
+          PAIRS: ${{ matrix.pairs }}
+        run: |
+          python ci/.github/abi/pair.py asm-base asm-change "$PAIRS" pairs-${{ matrix.name }} | tee pairs-${{ matrix.name }}.txt
+
       - name: Virtual calls through the changed vtable slots, with their argument setup, and the full listings
         if: matrix.offsets != ''
         shell: bash
@@ -97,5 +128,7 @@ jobs:
           name: abi-${{ matrix.name }}
           path: |
             abi-${{ matrix.name }}.txt
+            pairs-${{ matrix.name }}.txt
+            pairs-${{ matrix.name }}/
             callsites-*.txt
             listings-*/
