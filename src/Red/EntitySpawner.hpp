@@ -62,30 +62,15 @@ RED4EXT_ASSERT_OFFSET(EntitySpawnerRequest, priority, 0xE1);
 
 struct EntitySpawner
 {
-#if defined(__APPLE__)
-    // Mac ABI (R21): the SharedPtr comes back through x8 (the Windows result argument is gone), x1 is the request.
-    SharedPtr<EntitySpawnerToken> SpawnEntity(const EntitySpawnerRequest& aRequest)
-    {
-        constexpr auto SpawnEntityNative = Core::RawFunc<
-            /* addr = */ Red::AddressLib::EntitySpawner_SpawnEntity,
-            /* type = */ Red::SharedPtr<Red::EntitySpawnerToken> (*)(Red::EntitySpawner* aSpawner,
-                                                                     const Red::EntitySpawnerRequest& aRequest)>();
-
-        return SpawnEntityNative(this, aRequest);
-    }
-#else
+    // The SharedPtr comes back by value: through x8 on the Mac, through the result address after "this" in the Windows build.
     SharedPtr<EntitySpawnerToken> SpawnEntity(const EntitySpawnerRequest& aRequest)
     {
         constexpr auto SpawnEntity = Core::RawFunc<
             /* addr = */ Red::AddressLib::EntitySpawner_SpawnEntity,
-            /* type = */ void* (*)(Red::EntitySpawner* aSpawner,
-                                   Red::SharedPtr<Red::EntitySpawnerToken>& aToken,
-                                   const Red::EntitySpawnerRequest& aRequest)>();
+            /* type = */ Red::SharedPtr<Red::EntitySpawnerToken> (Red::EntitySpawner::*)(
+                const Red::EntitySpawnerRequest& aRequest)>();
 
-        Red::SharedPtr<Red::EntitySpawnerToken> token;
-        SpawnEntity(this, token, aRequest);
-        return token;
+        return SpawnEntity(this, aRequest);
     }
-#endif
 };
 }
