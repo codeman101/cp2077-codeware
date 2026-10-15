@@ -44,8 +44,7 @@ struct VisualControllerComponentEx : Red::entVisualControllerComponent
 
         if (update)
         {
-            Red::JobHandle jobHandle;
-            Raw::VisualController::LoadDependencies(controller, jobHandle, 0);
+            auto jobHandle = Raw::VisualController::LoadDependencies(controller, 0);
 
             if (aWait)
             {

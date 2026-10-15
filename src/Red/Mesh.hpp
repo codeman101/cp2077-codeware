@@ -22,26 +22,10 @@ using MaterialJob = Core::OffsetPtr<0x90, Red::JobHandle>;
 using MaterialLock = Core::OffsetPtr<0x98, Red::SharedSpinLock>;
 using ForceCache = Core::OffsetPtr<0xA0, bool>;
 
-#if defined(__APPLE__)
-// Mac ABI (R21): the Handle comes back through x8 and a3 moves to w1. LoadMaterialSetupAsync keeps the Windows call shape.
-constexpr auto LoadMaterialSetupAsyncNative = Core::RawFunc<
-    /* addr = */ Red::AddressLib::MeshAppearance_LoadMaterialSetupAsync,
-    /* type = */ Red::Handle<Red::mesh::MeshAppearance> (*)(Red::mesh::MeshAppearance* aAppearance, uint8_t a3)>();
-
-struct LoadMaterialSetupAsyncFn
-{
-    void operator()(Red::mesh::MeshAppearance& aAppearance, Red::Handle<Red::mesh::MeshAppearance>& aOut, uint8_t a3) const
-    {
-        aOut = LoadMaterialSetupAsyncNative(&aAppearance, a3);
-    }
-};
-inline constexpr LoadMaterialSetupAsyncFn LoadMaterialSetupAsync{};
-#else
+// The Handle comes back by value: through x8 on the Mac, through the result address after "this" in the Windows build.
 constexpr auto LoadMaterialSetupAsync = Core::RawFunc<
     /* addr = */ Red::AddressLib::MeshAppearance_LoadMaterialSetupAsync,
-    /* type = */ void (*)(Red::mesh::MeshAppearance& aAppearance, Red::Handle<Red::mesh::MeshAppearance>& aOut,
-                          uint8_t a3)>();
-#endif
+    /* type = */ Red::Handle<Red::mesh::MeshAppearance> (Red::mesh::MeshAppearance::*)(uint8_t a3)>();
 }
 
 namespace Raw::MeshComponent
