@@ -40,10 +40,7 @@ Red::Handle<Red::worldEnvironmentDefinition> App::WeatherSystemEx::GetEnvironmen
     if (!system)
         return {};
 
-    Red::Handle<Red::worldEnvironmentDefinition> definition;
-    Raw::RuntimeSystemWeather::GetEnvironmentDefinition(system, definition);
-
-    return definition;
+    return Raw::RuntimeSystemWeather::GetEnvironmentDefinition(system);
 }
 
 Red::Handle<Red::worldWeatherState> App::WeatherSystemEx::GetWeatherState()
@@ -53,8 +50,5 @@ Red::Handle<Red::worldWeatherState> App::WeatherSystemEx::GetWeatherState()
     if (!system)
         return {};
 
-    Red::Handle<Red::worldWeatherState> state;
-    Raw::RuntimeSystemWeather::GetWeatherState(system, state);
-
-    return state;
+    return Raw::RuntimeSystemWeather::GetWeatherState(system);
 }

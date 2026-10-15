@@ -90,10 +90,8 @@ void Mac::R21WorldAttachTests(RED4ext::world::RuntimeScene* aScene)
                  weather && weather->GetType() ? weather->GetType()->name.ToString() : "-");
     if (weather)
     {
-        Red::Handle<Red::worldEnvironmentDefinition> definition;
-        Raw::RuntimeSystemWeather::GetEnvironmentDefinition(weather, definition);
-        Red::Handle<Red::worldWeatherState> state;
-        Raw::RuntimeSystemWeather::GetWeatherState(weather, state);
+        auto definition = Raw::RuntimeSystemWeather::GetEnvironmentDefinition(weather);
+        auto state = Raw::RuntimeSystemWeather::GetWeatherState(weather);
 
         static auto* definitionType = Red::GetClass("worldEnvironmentDefinition");
         static auto* stateType = Red::GetClass("worldWeatherState");
