@@ -67,9 +67,9 @@ protected:
 
     inline static std::atomic<bool> s_macActive{false};
 
-    // Resolves the record ID of a puppet or vehicle that was created without one (Windows: the same call with an out pointer).
-    // The Mac function returns the ID in x0 and 0 when the parameter is null or holds no record; the game's own setter ignores
-    // an ID without a length byte, and so does this.
+    // Resolves the record ID of a puppet or vehicle that was created without one (Windows: the same call). The Mac function
+    // returns the ID in x0 and 0 when the parameter is null or holds no record; the game's own setter ignores an ID without a
+    // length byte, and so does this.
     inline static void ResolveMacRecordID(Red::Entity* aEntity, Red::EntityInitializeRequest* aRequest)
     {
         if (!aRequest->populationParam)
@@ -80,7 +80,7 @@ protected:
         if (!puppet && !vehicle)
             return;
 
-        const uint64_t id = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam);
+        const uint64_t id = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam).value;
         if (static_cast<uint32_t>(id) == 0 || ((id >> 32) & 0xFF) == 0)
             return;
 
@@ -156,11 +156,11 @@ protected:
     {
         if (auto puppet = Red::Cast<Red::gamePuppetBase>(aEntity))
         {
-            Raw::Entity::ResolveRecordID(aEntity, Raw::Puppet::RecordID::Ref(aEntity), aRequest->populationParam);
+            Raw::Puppet::RecordID::Ref(aEntity) = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam);
         }
         else if (auto vehicle = Red::Cast<Red::vehicleBaseObject>(aEntity))
         {
-            Raw::Entity::ResolveRecordID(aEntity, Raw::Vehicle::RecordID::Ref(aEntity), aRequest->populationParam);
+            Raw::Vehicle::RecordID::Ref(aEntity) = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam);
         }
     }
 

@@ -92,18 +92,14 @@ constexpr auto Detach = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_Detach,
     /* type = */ void (*)(Red::Entity* aEntity)>();
 
-#if defined(__APPLE__)
-// Mac ABI (R18): the TweakDBID (8 bytes, trivially copyable) comes back in x0 and there is no out pointer. The result is 0
-// when the parameter is null or holds no record. The entity argument is unused by the function.
+// The TweakDBID comes back by value: through the result address after "this" in the Windows build, in x0 on the Mac (8 bytes and
+// trivially copyable, so not through x8). The Mac function returns 0 when the parameter is null or holds no record and does not use
+// the entity.
+static_assert(sizeof(Red::TweakDBID) == sizeof(uint64_t) && std::is_trivially_copyable_v<Red::TweakDBID>);
+
 constexpr auto ResolveRecordID = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
-    /* type = */ uint64_t (*)(Red::Entity* aEntity, Red::populationPopulationSpawnParameter* aParam)>();
-#else
-constexpr auto ResolveRecordID = Core::RawFunc<
-    /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
-    /* type = */ void (*)(Red::Entity* aEntity, Red::TweakDBID& aOut,
-                          Red::populationPopulationSpawnParameter* aParam)>();
-#endif
+    /* type = */ Red::TweakDBID (Red::Entity::*)(Red::populationPopulationSpawnParameter* aParam)>();
 
 // constexpr auto GetComponents = Core::RawFunc<
 //     /* addr = */ Red::AddressLib::Entity_GetComponents,
