@@ -15,11 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - variant: A-remove-both-operators
-            ref: pr/handle-converting-ctor
-            patch: true
-          - variant: B-keep-lvalue-operator
-            ref: ci/handle-keep-lvalue-op
+          - variant: D-ctors-plus-lvalue-operator
+            ref: ci/handle-design-d
             patch: false
     name: ${{ matrix.variant }}
     steps:
@@ -57,13 +54,11 @@ jobs:
         run: xmake f -m release -y
 
       - name: Build
-        run: xmake -y -v -j1
+        run: xmake -y -v
 
       - name: Handle pointer test (MSVC)
-        if: always()
-        continue-on-error: true
         shell: cmd
         run: |
           for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VS=%%i
           call "%VS%\VC\Auxiliary\Build\vcvars64.bat"
-          cl /nologo /std:c++20 /EHsc /DNOMINMAX /DWIN32_LEAN_AND_MEAN /Ivendor\RED4ext.SDK\include .github\ci\handle_mi.cpp /Fe:handle_mi.exe && handle_mi.exe
+          cl /nologo /std:c++20 /EHsc /DNOMINMAX /DWIN32_LEAN_AND_MEAN /Ivendor\RED4ext.SDK\include .github\ci\handle_d.cpp /Fe:handle_d.exe && handle_d.exe
