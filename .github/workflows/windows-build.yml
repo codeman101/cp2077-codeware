@@ -11,6 +11,17 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: A-remove-both-operators
+            ref: pr/handle-converting-ctor
+            patch: true
+          - variant: B-keep-lvalue-operator
+            ref: ci/handle-keep-lvalue-op
+            patch: false
+    name: ${{ matrix.variant }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,9 +31,17 @@ jobs:
         shell: bash
         run: |
           cd vendor/RED4ext.SDK
-          git fetch https://github.com/codeman101/RED4ext.SDK-macos.git pr/handle-converting-ctor
+          git fetch https://github.com/codeman101/RED4ext.SDK-macos.git ${{ matrix.ref }}
           git checkout FETCH_HEAD
           git log --oneline -3
+
+      # Variant A only: the one out-parameter call that needed the removed operator, so the build can show what else breaks.
+      - name: Patch Serialization.hpp ReadObject call (variant A, CI only)
+        if: matrix.patch
+        shell: bash
+        run: |
+          sed -i 's|Raw::ObjectSerializer::ReadObject(aObject, stream|Raw::ObjectSerializer::ReadObject(*reinterpret_cast<Red::Handle<Red::ISerializable>*>(\&aObject), stream|' src/Red/Serialization.hpp
+          grep -n "ReadObject(" src/Red/Serialization.hpp
 
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
@@ -38,9 +57,11 @@ jobs:
         run: xmake f -m release -y
 
       - name: Build
-        run: xmake -y -v
+        run: xmake -y -v -j1
 
       - name: Handle pointer test (MSVC)
+        if: always()
+        continue-on-error: true
         shell: cmd
         run: |
           for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VS=%%i
