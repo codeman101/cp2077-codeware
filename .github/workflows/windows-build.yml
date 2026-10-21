@@ -61,4 +61,4 @@ jobs:
         run: |
           for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VS=%%i
           call "%VS%\VC\Auxiliary\Build\vcvars64.bat"
-          cl /nologo /std:c++20 /EHsc /DNOMINMAX /DWIN32_LEAN_AND_MEAN /Ivendor\RED4ext.SDK\include .github\ci\handle_d.cpp /Fe:handle_d.exe && handle_d.exe
+          cl /nologo /std:c++20 /EHsc /DNOMINMAX /DWIN32_LEAN_AND_MEAN /Ivendor\RED4ext.SDK\include .github\ci\handle_d.cpp /Fe:handle_d.exe /link user32.lib && handle_d.exe
