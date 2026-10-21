@@ -1,0 +1,48 @@
+name: Windows build check (SDK Handle change)
+
+# CI only, not part of any pull request: builds Codeware with vendor/RED4ext.SDK switched to the
+# wopss/RED4ext.SDK#226 branch, then builds and runs a Handle<Derived> to Handle<Base> pointer test with MSVC.
+
+on:
+  push:
+    branches: ["ci/**"]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Switch the SDK to the PR branch
+        shell: bash
+        run: |
+          cd vendor/RED4ext.SDK
+          git fetch https://github.com/codeman101/RED4ext.SDK-macos.git pr/handle-converting-ctor
+          git checkout FETCH_HEAD
+          git log --oneline -3
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Pin mimalloc 2 for TiltedCore (CI only)
+        shell: bash
+        run: |
+          sed -i '/^add_requires(/a add_requireconfs("tiltedcore.mimalloc", {override = true, version = "2.1.7"})' xmake.lua
+          grep -n "add_require" xmake.lua
+
+      - name: Configure (release)
+        run: xmake f -m release -y
+
+      - name: Build
+        run: xmake -y -v
+
+      - name: Handle pointer test (MSVC)
+        shell: cmd
+        run: |
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VS=%%i
+          call "%VS%\VC\Auxiliary\Build\vcvars64.bat"
+          cl /nologo /std:c++20 /EHsc /DNOMINMAX /DWIN32_LEAN_AND_MEAN /Ivendor\RED4ext.SDK\include .github\ci\handle_mi.cpp /Fe:handle_mi.exe && handle_mi.exe
