@@ -449,7 +449,7 @@ void Mac::JobDispatchTest()
     }
 
     // The dispatcher is created before InitEngine; do not call into the job runtime if it is not there.
-    const auto cell = reinterpret_cast<void* const*>(Red::MacGameBase() + 0x8DC7FF0);
+    const auto cell = reinterpret_cast<void* const*>(Red::MacGameBase() + 0x9D0E550);
     if (*cell == nullptr)
     {
         MAC_DIAG( "[selftest] R18 jobs: the job dispatcher does not exist yet, test not started\n");

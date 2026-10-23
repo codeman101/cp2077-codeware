@@ -207,7 +207,7 @@ void ResourceTests()
     }
 
     // The loader singleton is where the data row says it is.
-    const auto cell = reinterpret_cast<void* const*>(Red::MacGameBase() + 0x900B580);
+    const auto cell = reinterpret_cast<void* const*>(Red::MacGameBase() + 0x99DC690);
     auto* loader = Red::ResourceLoader::Get();
     MAC_DIAG( "[selftest] R19 ResourceLoader: cell=%p Get()=%p\n", *cell, static_cast<void*>(loader));
     Mac::R19Check(loader != nullptr && static_cast<void*>(loader) == *cell, "ResourceLoader::Get() is the pointer in the data cell");

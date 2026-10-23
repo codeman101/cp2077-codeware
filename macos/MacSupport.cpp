@@ -60,12 +60,12 @@ struct PoolOps
 };
 
 PoolOps g_pools[] = {
-    {"8PoolRTTI", kTagRtti, {0x2177D04, 0x2177E28, 0x2177F68, 0x21780B4, 0x217819C}, nullptr, nullptr, nullptr, nullptr, nullptr},
-    {"16PoolRTTIFunction", kTagFunction, {0x217844C, 0x2178570, 0x21786B0, 0x21787FC, 0x21788E4}, nullptr, nullptr, nullptr, nullptr, nullptr},
-    {"16PoolRTTIProperty", kTagProperty, {0x2178B94, 0x2178CB8, 0x2178DF8, 0x2178F44, 0x217902C}, nullptr, nullptr, nullptr, nullptr, nullptr},
+    {"8PoolRTTI", kTagRtti, {0x10A1FA4, 0x10A20C0, 0x10A21EC, 0x10A2324, 0x10A2408}, nullptr, nullptr, nullptr, nullptr, nullptr},
+    {"16PoolRTTIFunction", kTagFunction, {0x10A268C, 0x10a27a8, 0x10A28D4, 0x10A2A0C, 0x10A2AF0}, nullptr, nullptr, nullptr, nullptr, nullptr},
+    {"16PoolRTTIProperty", kTagProperty, {0x10A2D74, 0x10A2E90, 0x10A2FBC, 0x10A30F4, 0x10A31D8}, nullptr, nullptr, nullptr, nullptr, nullptr},
     // R14. Exports checked with nm: Allocate 0x344DCAC, AllocateAligned 0x344DDD0, Reallocate 0x344DF10,
     // ReallocateAligned 0x344E05C, Free 0x344E144.
-    {"10PoolScript", kTagScript, {0x344DCAC, 0x344DDD0, 0x344DF10, 0x344E05C, 0x344E144}, nullptr, nullptr, nullptr, nullptr, nullptr},
+    {"10PoolScript", kTagScript, {0x4E33A00, 0x4E33B1C, 0x4E33C48, 0x4E33D80, 0x4E33E64}, nullptr, nullptr, nullptr, nullptr, nullptr},
 };
 
 const char* kPoolSuffixes[5] = {
@@ -848,10 +848,10 @@ namespace
 // sets vtable 0x6FB1FA0. The base constructor writes pair at +0x100; the game's
 // GetGameInstance native (0x1F42944) reads that pair through CStackFrame+0x28. The base
 // constructor writes {0x415643ff7b, this}.
-constexpr uintptr_t kGameInstanceCtorRva = 0x1F2D640;
+constexpr uintptr_t kGameInstanceCtorRva = 0x1691AEC;
 // Return address of the call in the CGameFramework constructor (0x3F0D2AC), which stores the
 // instance at framework+0x10. The other three callers belong to other app types.
-constexpr uintptr_t kFrameworkCtorSiteRva = 0x3F0D330;
+constexpr uintptr_t kFrameworkCtorSiteRva = 0x1577C2C;
 constexpr uint64_t kGameInstanceMagic = 0x415643ff7bULL; // mov #0xff7b; movk #0x5643, lsl 16; movk #0x41, lsl 32
 
 using GameInstanceCtor_t = void* (*)(void*);

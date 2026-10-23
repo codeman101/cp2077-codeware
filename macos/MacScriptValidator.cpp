@@ -67,7 +67,7 @@ constexpr auto kScnChatter = Red::CName("scnChatter");
 constexpr auto kAudioEventElement = Red::CName("audioAudioEventMetadataArrayElement");
 constexpr auto kEntLODDefinition = Red::CName("entLODDefinition");
 
-constexpr uintptr_t kOpcodeTableRva = 0x908B798;
+constexpr uintptr_t kOpcodeTableRva = 0x9A5C940;
 constexpr uint8_t kOpNew = Raw::ScriptOpCodes::New;   // 48
 constexpr uint8_t kOpCast = Raw::ScriptOpCodes::Cast; // 90
 

@@ -41,7 +41,7 @@ RED4ext::GameInstance* MacGameInstance();
 
 namespace
 {
-constexpr uintptr_t kWalkerRva = 0x3314DDC;    // GameInstance: collects the save locks (GatherSaveLocks)
+constexpr uintptr_t kWalkerRva = 0x1AE852C;    // GameInstance: collects the save locks (GatherSaveLocks)
 constexpr uintptr_t kIsSavingLockedSlot = 0x178; // Mac offset (Windows 0x170, shifted by the second destructor slot)
 constexpr uintptr_t kSlotFirst = 0x00;
 constexpr uintptr_t kSlotLast = 0x1D0;           // inclusive, covers IScriptable up to a few slots past OnUninitialize

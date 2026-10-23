@@ -30,9 +30,9 @@ struct Row
 
 // Must equal the rows in MacSdkRows.inc.
 constexpr Row kRows[] = {
-    {2399343890u, 0x2198B40, "CClass_GetProperty"},
-    {2257327441u, 0x2197BE4, "CClass_InitializeProperties"},
-    {2547979664u, 0x2197D40, "CClass_AssignDefaultValuesToProperties"},
+    {2399343890u, 0x10C4C14, "CClass_GetProperty"},
+    {2257327441u, 0x10C37D8, "CClass_InitializeProperties"},
+    {2547979664u, 0x10C3934, "CClass_AssignDefaultValuesToProperties"},
 };
 
 struct Tally
