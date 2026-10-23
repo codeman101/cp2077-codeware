@@ -46,8 +46,8 @@ static void R21LockProtocolTest()
 {
     using TryFn = uint32_t (*)(volatile char*);
     const auto base = Red::MacGameBase();
-    auto gameTryExclusive = reinterpret_cast<TryFn>(base + 0x20E8);
-    auto gameTryShared = reinterpret_cast<TryFn>(base + 0x2100);
+    auto gameTryExclusive = reinterpret_cast<TryFn>(base + 0x1614);
+    auto gameTryShared = reinterpret_cast<TryFn>(base + 0x162C);
 
     Red::SharedSpinLock lock;
     // An SDK writer: the game must see it as held.

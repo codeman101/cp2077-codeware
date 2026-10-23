@@ -30,7 +30,7 @@ namespace
 {
 constexpr uint32_t kHashCGameEngine = 2549221846u;       // RED4ext Detail::AddressHashes::CGameEngine
 constexpr uint32_t kHashEngineTimeFreq = 3151104823u;    // Red::AddressLib::EngineTime_Frequency
-constexpr uintptr_t kRvaTickFrequency = 0x4D2C;          // uint64_t(), ticks per second from mach_timebase_info (cached)
+constexpr uintptr_t kRvaTickFrequency = 0x4B5C;          // uint64_t(), ticks per second from mach_timebase_info (cached)
 
 RED4ext::CGameEngine* volatile s_engineSlot = nullptr;
 double s_frequency = 0.0;
