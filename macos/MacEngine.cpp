@@ -59,11 +59,11 @@ std::atomic<int> s_checks{0};
 std::atomic<int> s_failed{0};
 
 // The framework object (class CGameFramework). On Windows the SDK keeps it at engine +0x308. On Mac the framework job body
-// (0x3F282C4) writes a different object to +0x310, and the framework itself is at +0x338: found in r18d by scanning the engine
+// (0x3F282C4) writes a different object to +0x310, and the framework itself is at +0x338 (2.3.1; 2.5.0: job body 0x1593BB8 stores +0x350, framework at +0x378): found in r18d by scanning the engine
 // for the pointer the GameInstance job (0x3F0D900) works on (its closure's first word), whose GameInstance (+0x10) is the one
 // the constructor hook saw and whose scene (+0x18) is the one passed to OnWorldAttached. Layout of the object itself matches the
 // SDK: vtable +0x00, GameInstance* +0x10, runtime scene +0x18 (RuntimeScene, 0x4B8 bytes, built by the framework constructor).
-constexpr uintptr_t kEngineFrameworkOffset = 0x338;
+constexpr uintptr_t kEngineFrameworkOffset = 0x378; // 2.5.0 (2.3.1: 0x338; CBaseEngine grew 0x40)
 
 struct FrameworkView
 {
@@ -320,7 +320,7 @@ void Mac::EngineSelfTest()
     {
         R18Check(engine->scriptsLoaded, "engine scriptsLoaded (+0x54) is set after LoadScripts");
         R18Check(engine->engineState >= RED4ext::EEngineState::BaseInitialization && engine->engineState <= RED4ext::EEngineState::Running,
-                 "engine state (+0x108) is BaseInitialization, Initialization or Running");
+                 "engine state (+0x128) is BaseInitialization, Initialization or Running");
         MAC_DIAG("[selftest] R18 engine=%p state=%d scriptsLoaded=%d framework=%p\n", static_cast<void*>(engine),
                  static_cast<int>(engine->engineState), engine->scriptsLoaded ? 1 : 0, static_cast<void*>(CurrentFramework(engine)));
     }
@@ -517,11 +517,11 @@ void Mac::OnFrameworkJob(void* aData)
     uintptr_t slot308 = 0, slot310 = 0;
     if (engine)
     {
-        SafeRead(reinterpret_cast<uintptr_t>(engine) + 0x308, &slot308, sizeof(slot308));
-        SafeRead(reinterpret_cast<uintptr_t>(engine) + 0x310, &slot310, sizeof(slot310));
+        SafeRead(reinterpret_cast<uintptr_t>(engine) + 0x348, &slot308, sizeof(slot308));
+        SafeRead(reinterpret_cast<uintptr_t>(engine) + 0x350, &slot310, sizeof(slot310));
     }
-    MAC_DIAG("[diag] R18 framework job: closure=%p framework=0x%llx words=%llx %llx %llx %llx %llx engine+0x308=0x%llx "
-             "engine+0x310=0x%llx MacGameInstance=%p\n",
+    MAC_DIAG("[diag] R18 framework job: closure=%p framework=0x%llx words=%llx %llx %llx %llx %llx engine+0x348=0x%llx "
+             "engine+0x350=0x%llx MacGameInstance=%p\n",
              aData, static_cast<unsigned long long>(framework), static_cast<unsigned long long>(words[0]),
              static_cast<unsigned long long>(words[1]), static_cast<unsigned long long>(words[2]),
              static_cast<unsigned long long>(words[3]), static_cast<unsigned long long>(words[4]),
@@ -572,11 +572,11 @@ void Mac::RuntimeSceneSelfTest(RED4ext::world::RuntimeScene* aScene)
     }
     auto* engine = Engine();
     auto* fw = CurrentFramework(engine);
-    MAC_DIAG("[selftest] R18 world attach: scene=%p framework(+0x338)=%p gameInstance=%p scene18=0x%llx MacGameInstance=%p\n",
+    MAC_DIAG("[selftest] R18 world attach: scene=%p framework(+0x378)=%p gameInstance=%p scene18=0x%llx MacGameInstance=%p\n",
              static_cast<void*>(aScene), static_cast<void*>(fw), fw ? static_cast<void*>(fw->gameInstance) : nullptr,
              fw ? static_cast<unsigned long long>(fw->scene) : 0ULL, static_cast<void*>(Red::MacGameInstance()));
     R18Check(fw != nullptr, "engine framework exists at the first world attach");
-    R18Check(FrameworkOf(engine) == fw, "the engine slot (+0x338) holds the framework seen by the GameInstance job");
+    R18Check(FrameworkOf(engine) == fw, "the engine slot (+0x378) holds the framework seen by the GameInstance job");
     if (fw)
     {
         R18Check(fw->gameInstance == Red::MacGameInstance(),

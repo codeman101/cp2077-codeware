@@ -26,7 +26,7 @@ const std::unordered_map<uint32_t, uintptr_t>& MacRows()
         {3273923080, 0x4D7EFB8}, // CBaseEngine_InitEngine. bool(CBaseEngine&, CGameOptions&). Windows 0x7CB080: same init-stage strings and options+0xB1.
         {3729789488, 0x4D7FBA8}, // CBaseEngine_LoadGatheredResources. bool(CBaseEngine&). Windows 0x303460: virtual slot 0xD0 (Mac 0xD8), helper call, bool.
         {4007601841, 0x1578050}, // CGameFramework_InitializeGameInstance. Job body void(closure, group); the first word of the closure is the CGameFramework, and the job frees the closure. Windows 0x16145C.
-        {3993832650, 0x111CC00}, // ScriptBundle_dtor. void(ScriptBundle*). Windows 0x7B7C18: same member destruction order (+0x138 ... +0x90).
+        {3993832650, 0x111CC00}, // ScriptBundle_dtor. void(ScriptBundle*). Windows 0x7B7C18: same member destruction order (+0x138 ... +0x90; Mac 2.5.0: +0xD8 ... down, the bundle gained 8 bytes in front).
         // R18 B0/B1. Entity lifecycle, input, player, vehicle, component and sound rows. Each was matched against the Windows twin
         // by a read-only agent (strings, field offsets, callees, a caller on both sides) and rated by tools/addr-match/check-rows.py.
         {3490519617, 0x19AA7D8},  // Entity_Initialize. void(Entity*, JobQueue&, EntityInitializeRequest*). RequestComponents and four job schedulers are inlined. Windows 0x8B0190.
@@ -66,8 +66,11 @@ const std::unordered_map<uint32_t, uintptr_t>& MacRows()
         {1158555307, 0x435413C}, // InkWidgetLibrary_SpawnFromLocal. Handle<WidgetLibraryItemInstance>(lib&, CName), the Handle through x8. Windows 0x57F9C0.
         {506278179, 0x435424C},  // InkWidgetLibrary_SpawnFromExternal. Handle(lib&, ResourcePath, CName), the Handle through x8. Windows 0x9FB618.
         {118698863, 0x4353a7c},  // InkWidgetLibrary_AsyncSpawnFromLocal. bool(lib&, InkSpawningInfo&, CName, bool flag). Windows 0x57F26C.
+        {2342073570, 0x4353a7c}, // InkWidgetLibrary_AsyncSpawnFromLocal: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x208F2E0). Mac signature already carries the bool.
         {1396063719, 0x4353D74}, // InkWidgetLibrary_AsyncSpawnFromExternal. bool(lib&, InkSpawningInfo&, ResourcePath, CName, bool flag). Windows 0x9FB2A8.
+        {225197914, 0x4353D74},  // InkWidgetLibrary_AsyncSpawnFromExternal: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x208F250).
         {2698985195, 0x4368F34}, // InkSpawner_FinishAsyncSpawn. void(InkSpawningContext*, Handle<WidgetLibraryItemInstance>&): the call operator of the std::function behind InkSpawningInfo. Windows 0xFA63F0.
+        {4097515464, 0x4368F34}, // InkSpawner_FinishAsyncSpawn: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x209FBE0).
         {2671382832, 0x41ABBF4}, // InkLogicController_OnInitialize. void(controller): the base implementation shared by 82 vtables (slot 0x110). Windows 0x581514.
         {1159862457, 0x41ABD94}, // InkLogicController_OnUninitialize. void(controller): base implementation (slot 0x118). Windows 0x4A2B40.
         {3589084925, 0x41ABEA4}, // InkLogicController_OnArrangeChildrenComplete. void(controller): base implementation (slot 0x120). Windows 0x32B78C.
@@ -87,11 +90,13 @@ const std::unordered_map<uint32_t, uintptr_t>& MacRows()
         {3878623943, 0x1A2BF84},  // RuntimeEntityRegistry_UnregisterEntity. bool(registry, Entity*). Windows 0x8B5310.
         {1576214475, 0x1A3D6FC},  // RuntimeSystemEntity_AttachEntity. void(system, const AttachRequest*): a two instruction thunk (ldr x0,[x0,#0x48]; b 0xCF6EBC), called not hooked. Windows 0x8B6928.
         {1737563910, 0x1A3D704},  // RuntimeSystemEntity_DetachEntity. void(system, const Handle<Entity>*): a two instruction thunk. Windows 0xB839B8.
+        {2597397686, 0x1A3D704},  // RuntimeSystemEntity_DetachEntity: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x74A8B8). The Mac callee has no reason argument.
         {1239092911, 0x40075E8}, // TagSystem_AssignTag. void(red::TagSystem* = GameTagSystem + 0x48, EntityID, CName). Windows 0x42559C.
         {1875775378, 0x4007B40}, // TagSystem_UnassignTag. void(red::TagSystem*, EntityID, CName). Windows 0xFF1AD8.
         {1559565515, 0x472C880}, // CommunitySystem_Update. void(CommunitySystem*, bool). Windows 0x3F226C.
         {1471948702, 0x1A71ABC},  // RuntimeSystemWeather_GetEnvironmentDefinition. Handle<worldEnvironmentDefinition>(system): the Handle through x8. Windows 0x1DB070.
         {1821516328, 0x1A70298},  // RuntimeSystemWeather_SetWeatherByIndex. (system, uint32 index, CName source, uint32 a5, uint32 priority, float blend in s0). Windows 0xA0592C.
+        {2987664085, 0x1A70298},  // RuntimeSystemWeather_SetWeatherByIndex: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x2127C70). Mac gained a bool in w5.
         {2334794340, 0x1A730FC},  // RuntimeSystemWeather_SetWeatherByName. bool(system, CName weather, CName source, uint32 a5, uint32 priority, float blend in s0). Windows 0x13CC1AC.
         {2679119876, 0x1A71548},  // RuntimeSystemWeather_GetWeatherState. Handle<worldWeatherState>(system): the Handle through x8. Windows 0xA06808.
         {803085170, 0x3140998},  // PointOfInterestMappin_SetPhase. bool(mappin, phase): vtable slot 0x1D0 of PointOfInterestMappin on Mac (0x1C8 on Windows). Windows 0x27A6F20.

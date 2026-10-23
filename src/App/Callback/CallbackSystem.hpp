@@ -30,7 +30,11 @@ public:
                                                         const Red::Handle<Red::IScriptable>& aContext,
                                                         Red::CName aFunction, Red::Optional<bool> aSticky,
                                                         Red::CStackFrame* aFrame = nullptr);
-    Red::Handle<CallbackSystemHandler> RegisterStaticCallback(Red::CName aEventName, Red::CName aContext,
+    // Game 2.5's script declaration (the one mods compile against) takes the target as an object:
+    // RegisterStaticCallback(eventName: CName, target: IScriptable, functionName: CName, opt sticky: Bool).
+    // The static callback is bound to the target's class.
+    Red::Handle<CallbackSystemHandler> RegisterStaticCallback(Red::CName aEventName,
+                                                              const Red::Handle<Red::IScriptable>& aTarget,
                                                               Red::CName aFunction, Red::Optional<bool> aSticky,
                                                               Red::CStackFrame* aFrame = nullptr);
 
@@ -38,7 +42,9 @@ public:
                             Red::Optional<Red::CName> aFunction);
     void UnregisterStaticCallback(Red::CName aEventName, Red::CName aContext, Red::Optional<Red::CName> aFunction);
 
-    bool RegisterEvent(Red::CName aEventName, Red::Optional<Red::CName> aEventType);
+    // Returns nothing on game 2.5, as the game's script declaration does.
+    void RegisterEvent(Red::CName aEventName, Red::Optional<Red::CName> aEventType);
+    bool RegisterEventImpl(Red::CName aEventName, Red::CName aEventType);
     void DispatchEvent(const Red::Handle<CallbackSystemEvent>& aEvent);
     void DispatchEventAs(Red::CName aEventName, const Red::Handle<CallbackSystemEvent>& aEvent);
 
@@ -113,6 +119,8 @@ public:
         return counts;
     }
 #endif
+    // Game 2.5 declares GameInstance.GetCallbackSystem(opt gi: GameInstance).
+    static constexpr bool GetterTakesGameInstance = true;
 
 protected:
     void OnWorldAttached(Red::world::RuntimeScene*) override;
@@ -129,6 +137,14 @@ protected:
     void OnGamePaused() override;
     void OnGameResumed() override;
 
+public:
+    // The static callback bound to a class name (the body of RegisterStaticCallback, which takes the class from a target object).
+    // macOS: the self-tests (macos/MacR13.cpp) register against their native class by name; no instance of it exists.
+    Red::Handle<CallbackSystemHandler> RegisterStaticCallbackImpl(Red::CName aEventName, Red::CName aContext,
+                                                                  Red::CName aFunction, Red::Optional<bool> aSticky,
+                                                                  Red::CStackFrame* aFrame = nullptr);
+
+protected:
     void MapEventName(Red::CName& aEventName);
     void ActivateEvent(Red::CName aEventName);
     void DeactivateEvent(Red::CName aEventName);

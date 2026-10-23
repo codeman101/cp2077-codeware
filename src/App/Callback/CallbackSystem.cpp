@@ -182,8 +182,17 @@ Red::Handle<App::CallbackSystemHandler> App::CallbackSystem::RegisterCallback(
 }
 
 Red::Handle<App::CallbackSystemHandler> App::CallbackSystem::RegisterStaticCallback(
-    Red::CName aEventName, Red::CName aContext, Red::CName aFunction,
+    Red::CName aEventName, const Red::Handle<Red::IScriptable>& aTarget, Red::CName aFunction,
     Red::Optional<bool> aSticky, Red::CStackFrame* aFrame)
+{
+    const auto aContext = aTarget ? aTarget->GetType()->GetName() : Red::CName{};
+
+    return RegisterStaticCallbackImpl(aEventName, aContext, aFunction, aSticky, aFrame);
+}
+
+Red::Handle<App::CallbackSystemHandler> App::CallbackSystem::RegisterStaticCallbackImpl(
+    Red::CName aEventName, Red::CName aContext, Red::CName aFunction, Red::Optional<bool> aSticky,
+    Red::CStackFrame* aFrame)
 {
     MapEventName(aEventName);
 
@@ -314,15 +323,18 @@ void App::CallbackSystem::FireCallbacks(const Red::Handle<CallbackSystemEvent>& 
     }
 }
 
-bool App::CallbackSystem::RegisterEvent(Red::CName aEventName, Red::Optional<Red::CName> aEventType)
+void App::CallbackSystem::RegisterEvent(Red::CName aEventName, Red::Optional<Red::CName> aEventType)
+{
+    Red::CName eventType = aEventType;
+    RegisterEventImpl(aEventName, eventType ? eventType : aEventName);
+}
+
+bool App::CallbackSystem::RegisterEventImpl(Red::CName aEventName, Red::CName aEventType)
 {
     std::unique_lock _(m_callbacksLock);
 
     if (m_supportedEvents[aEventName])
         return false;
-
-    if (!aEventType)
-        aEventType = aEventName;
 
     if (!Red::GetClass(aEventType))
         return false;

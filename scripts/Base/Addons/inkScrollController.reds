@@ -42,3 +42,6 @@ public native let viewportSize: Vector2;
 
 @addField(inkScrollController)
 public native let contentSize: Vector2;
+
+@addField(inkScrollController)
+public native let resetToDesiredOnSetup: Bool;

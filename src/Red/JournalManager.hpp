@@ -12,6 +12,7 @@ namespace Raw::JournalManager
 // the Handle overload of ChangeEntryState (Mac 0x268) sit at the same offset as on Windows: their address argument below is the
 // Windows offset minus 8, which is what RawVFunc adds back. GetEntryByHash returns the Handle through x8 on Mac and has no out
 // argument, so it gets a wrapper with the Windows call shape.
+// Game 2.5: gameJournalManager slots 0x210/0x220/0x268/0x2B0/0x2C8 have the same code as on 2.31.
 constexpr auto GetEntries = Core::RawVFunc<
     /* addr = */ 0x210,
     /* type = */ void* (Red::gameIJournalManager::*)(const Red::gameJournalRequestContext& aRequest,

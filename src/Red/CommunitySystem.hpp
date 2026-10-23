@@ -91,6 +91,8 @@ namespace Raw::CommunitySystem
 // Mac 0x238 (an instruction-identical copy sits at 0x240) and GetSpawner stays at 0x260 (0x250 and 0x258 are identical copies);
 // their address argument below is the Mac slot minus 8, which RawVFunc adds back. The WeakPtr results come back through x8 on Mac
 // and the id moves up one register, so both get a wrapper with the Windows call shape.
+// Game 2.5: gameCommunitySystem slots 0x1B0-0x1E8 and 0x258-0x268 are the 2.31 functions (same code or the same
+// code with other registers; 0x220/0x228 fold into 0x1C2498). The Community/Spawner structs were not re-derived.
 constexpr auto ActivateCommunity = Core::RawVFunc<
     /* addr = */ 0x1B0,
     /* type = */ void (Red::ICommunitySystem::*)(uint64_t aCommunityID, Red::CName aEntryName),

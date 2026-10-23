@@ -186,7 +186,7 @@ void Mac::R16aSelfTest()
         }
     }
 
-    // 4. Object layout the record-ID reads depend on (Raw::Puppet::RecordID +0x260, Raw::Vehicle::RecordID +0x638).
+    // 4. Object layout the record-ID reads depend on (Raw::Puppet::RecordID +0x260, Raw::Vehicle::RecordID +0x658 on 2.5.0, +0x638 on 2.3.1).
     LogSize("entEntity", sizeof(RED4ext::ent::Entity));
     LogSize("gamePuppetBase", sizeof(RED4ext::game::PuppetBase));
     LogSize("vehicleBaseObject", sizeof(RED4ext::vehicle::BaseObject));

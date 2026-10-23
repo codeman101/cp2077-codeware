@@ -8,10 +8,11 @@
 //   ScriptOpCodeNew/Cast-> same bodies, written into the opcode handler table (0x908B798) by PatchScriptOpCodes.
 //
 // Mac facts this file relies on (R14 static analysis, R15 re-checked):
-//   ScriptBundle: classes DynArray at +0xD0 (entries, capacity, size), definitionsByName HashMap at +0x00.
-//   ScriptClass: name +0x08, parent +0x20, properties +0x28 (size +0x34), flags byte +0x89 (bit1 importOnly,
-//   bit2 abstract, bit4 struct). ScriptProperty: parent +0x20, type +0x90. ScriptType: name +0x08, innerType +0x20,
-//   metaType +0x2C. EScriptType and ERTTIType values equal the SDK enums (the game's jump tables use them).
+//   ScriptBundle (2.5.0: +8 in front): classes DynArray at +0xD8 (entries, capacity, size), definitionsByName HashMap at +0x08.
+//   ScriptClass (2.5.0): name +0x08, parent +0x48, properties +0x50 (capacity +0x58, size +0x5C), flags byte +0xD1 (bit1 importOnly,
+//   bit2 abstract, bit4 struct). ScriptProperty: type +0xB8. ScriptType: name +0x08, innerType +0x48,
+//   metaType +0x54. (2.3.1: classes +0xD0, definitionsByName +0x00, parent +0x20, properties +0x28/+0x30/+0x34, flags +0x89,
+//   property type +0x90, innerType +0x20, metaType +0x2C.) EScriptType and ERTTIType values equal the SDK enums (the game's jump tables use them).
 //   ScriptDefinition virtuals sit 8 bytes later than the Windows header comments (two destructor slots), which the
 //   compiler already accounts for when the header is built for Mac (GetType 0x18, IsNative 0x38 match the game).
 //   CBaseRTTIType::GetType is vtable +0x28, GetInnerType +0xC8 (same shift, again produced by the compiler).
@@ -26,6 +27,7 @@
 
 #include "Core/Hooking/HookingAgent.hpp"
 #include "Red/Scripting.hpp"
+#include "App/Scripting/VanillaApiCompat.hpp"
 
 #include <atomic>
 #include <cstdint>
@@ -56,6 +58,12 @@ constexpr auto kCurveDataVector2 = Red::CName("CurveDataVector2");
 constexpr auto kCurveDataVector3 = Red::CName("CurveDataVector3");
 constexpr auto kCurveDataVector4 = Red::CName("CurveDataVector4");
 constexpr auto kCurveDataHDRColor = Red::CName("CurveDataHDRColor");
+
+// Game 2.5 declares CallbackSystemHandler.SetRunMode/SetLifetime with its own enums (same members and values as Codeware's).
+constexpr auto kGameCallbackRunMode = Red::CName("gameCallbackRunMode");
+constexpr auto kGameCallbackLifetime = Red::CName("gameCallbackLifetime");
+constexpr auto kCallbackRunMode = Red::CName("CallbackRunMode");
+constexpr auto kCallbackLifetime = Red::CName("CallbackLifetime");
 
 constexpr char kResourceRefPrefix[] = "rRef:";
 constexpr char kResourceAsyncRefPrefix[] = "raRef:";
@@ -136,6 +144,7 @@ enum class NameRule
     None,
     Wrapper, // ResourceRef -> rRef:, ResourceAsyncRef / ResRef -> raRef:
     Curve,   // the five CurveData wrappers -> curveData:
+    Alias,   // 2.5: gameCallbackRunMode / gameCallbackLifetime -> CallbackRunMode / CallbackLifetime (counted with the wrappers)
 };
 
 NameRule MatchNames(Red::CName aScript, Red::CName aNative)
@@ -145,6 +154,11 @@ NameRule MatchNames(Red::CName aScript, Red::CName aNative)
         return NameRule::None;
     }
 
+    if ((aScript == kGameCallbackRunMode && aNative == kCallbackRunMode) ||
+        (aScript == kGameCallbackLifetime && aNative == kCallbackLifetime))
+    {
+        return NameRule::Alias;
+    }
     if (aScript == kResourceRef)
     {
         const char* n = aNative.ToString();
@@ -317,7 +331,7 @@ LayoutResult CheckLayout(Red::ScriptBundle* aBundle)
     if (!SafeRead(&aBundle->classes.entries, entries) || !SafeRead(&aBundle->classes.capacity, capacity) ||
         !SafeRead(&aBundle->classes.size, size))
     {
-        return fail("classes unreadable (+0xD0)");
+        return fail("classes unreadable (+0xD8)");
     }
     if (size < 1 || size > 200000 || capacity < size || entries == 0 || (entries & 7) != 0)
     {
@@ -354,21 +368,21 @@ LayoutResult CheckLayout(Red::ScriptBundle* aBundle)
         {
             return fail("classes[" + std::to_string(i) + "] name is not a printable string");
         }
-        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0x20), parent) || (parent != 0 && (parent & 7) != 0))
+        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0x48), parent) || (parent != 0 && (parent & 7) != 0))
         {
-            return fail("classes[" + std::to_string(i) + "] parent (+0x20)");
+            return fail("classes[" + std::to_string(i) + "] parent (+0x48)");
         }
-        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0x89), flags))
+        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0xD1), flags))
         {
-            return fail("classes[" + std::to_string(i) + "] flags (+0x89)");
+            return fail("classes[" + std::to_string(i) + "] flags (+0xD1)");
         }
         uint32_t propCapacity = 0;
         uint32_t propSize = 0;
-        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0x30), propCapacity) ||
-            !SafeRead(reinterpret_cast<const void*>(ptr + 0x34), propSize) || propSize > propCapacity ||
+        if (!SafeRead(reinterpret_cast<const void*>(ptr + 0x58), propCapacity) ||
+            !SafeRead(reinterpret_cast<const void*>(ptr + 0x5C), propSize) || propSize > propCapacity ||
             propSize > 1000000)
         {
-            return fail("classes[" + std::to_string(i) + "] properties (+0x28)");
+            return fail("classes[" + std::to_string(i) + "] properties (+0x50)");
         }
 
         // GetType() is the third virtual after the two destructors (vtable +0x18) and must say Class.
@@ -393,7 +407,7 @@ LayoutResult CheckLayout(Red::ScriptBundle* aBundle)
         !SafeRead(reinterpret_cast<const uint8_t*>(&aBundle->definitionsByName) + 12, mapCapacity) || indexTable == 0 ||
         mapSize == 0 || mapCapacity < mapSize)
     {
-        return fail("definitionsByName header (+0x00)");
+        return fail("definitionsByName header (+0x08)");
     }
 
     if (!aBundle->definitionsByName.Get(kISerializable))
@@ -443,6 +457,9 @@ struct PortCounts
 // Port of ScriptingService::OnValidateScripts with the layout guard and null checks.
 void PreValidate(Red::ScriptBundle* aBundle)
 {
+    // Game 2.5: the shared script names are bound to Codeware's types before the scripts are checked (as on Windows).
+    App::VanillaApiCompat::Apply();
+
     const auto layout = CheckLayout(aBundle);
     if (!layout.ok)
     {
@@ -487,6 +504,16 @@ void PreValidate(Red::ScriptBundle* aBundle)
             continue;
         }
         ++c.nativeDefs;
+
+        // Game 2.5: the vanilla bundle declares ScriptableService / CallbackSystemEvent without `abstract`, but their script
+        // names now resolve to Codeware's abstract types (VanillaApiCompat).
+        if (App::VanillaApiCompat::IsSharedScriptName(classDef->name))
+        {
+            if (auto* sharedNative = Red::GetScriptClass(classDef->name))
+            {
+                classDef->flags.isAbstract = sharedNative->flags.isAbstract;
+            }
+        }
 
         if (classDef->name == kISerializable)
         {
@@ -751,7 +778,7 @@ bool OnValidateProperty(void* aValidator, Red::ScriptProperty* aScriptProp, Red:
                 PropNames(aScriptProp, who, sizeof(who));
                 MAC_DIAG( "[cw] R15 override array %s script=%s native=%s via=%s\n", who,
                              NameStr(scriptType->name), NameStr(nativeType->GetName()),
-                             rule == NameRule::None ? "recursion" : (rule == NameRule::Wrapper ? "wrapper" : "curve"));
+                             rule == NameRule::None ? "recursion" : (rule != NameRule::Curve ? "wrapper" : "curve"));
             }
         }
         else if (!mine && orig)
@@ -800,15 +827,15 @@ bool OnValidateProperty(void* aValidator, Red::ScriptProperty* aScriptProp, Red:
         const auto rule = MatchScriptType(scriptType, nativeType, &matched);
         if (rule != NameRule::None)
         {
-            auto& counter = rule == NameRule::Wrapper ? g_stats.wrapperOverride : g_stats.curveOverride;
-            auto& logged = rule == NameRule::Wrapper ? g_stats.loggedWrapper : g_stats.loggedCurve;
+            auto& counter = rule != NameRule::Curve ? g_stats.wrapperOverride : g_stats.curveOverride;
+            auto& logged = rule != NameRule::Curve ? g_stats.loggedWrapper : g_stats.loggedCurve;
             counter.fetch_add(1, std::memory_order_relaxed);
             if (ShouldLog(logged, 3))
             {
                 char who[256];
                 PropNames(aScriptProp, who, sizeof(who));
                 MAC_DIAG( "[cw] R15 override %s %s script=%s native=%s\n",
-                             rule == NameRule::Wrapper ? "wrapper" : "curve", who, NameStr(matched),
+                             rule != NameRule::Curve ? "wrapper" : "curve", who, NameStr(matched),
                              NameStr(nativeType->GetName()));
             }
             return true;

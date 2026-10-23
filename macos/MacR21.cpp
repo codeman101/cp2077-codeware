@@ -156,7 +156,7 @@ T ReadAt(const void* aBase, size_t aOffset)
 
 // Mac layout, read from the registrar's append helper (Mac 0x3D902E4, called with x0 = [registrar]): registrar -> impl; impl+0 points to
 // the group array of 16 byte records indexed by the entry's first byte (the tick group, or 4 for a bucket entry). A record holds the entry
-// data pointer at +0, the capacity at +8 and the count at +0xC. Entries are 0x80 bytes.
+// data pointer at +0, the capacity at +8 and the count at +0xC. Entries are 0xC0 bytes on 2.5.0 (0x80 on 2.3.1; the ResizeBuffer stride in 0x4D6F884).
 const void* GroupsOf(const void* aImpl)
 {
     return ReadAt<const void*>(aImpl, 0);
@@ -204,7 +204,7 @@ void Mac::R21DumpRegistrar(void* aRegistrar, const char* aWhen)
 void Mac::R21CheckRegistration(void* aRegistrar, uint32_t aCountBefore, const char* aName, void* aSystem)
 {
     // The entry layout is the game's own (read from UpdateRegistrar_RegisterGroupUpdate, Mac 0x3D95800): byte 0 = group, a 0x20 byte
-    // callback buffer at +8, the callback handler at +0x28, the system's CClass* at +0x58, the name at +0x60, the live argument 0xA at +0x68.
+    // callback buffer at +8, the callback handler at +0x48, the system's CClass* at +0x98, the name at +0xA0, the live argument 0xA at +0xA8 (Mac 2.5.0; 2.3.1: +0x28/+0x58/+0x60/+0x68, and the 0x20 byte buffer at +8 became 0x40).
     if (!Mac::DiagEnabled() || !aRegistrar)
         return;
     const void* impl = ReadAt<const void*>(aRegistrar, 0);
@@ -219,13 +219,13 @@ void Mac::R21CheckRegistration(void* aRegistrar, uint32_t aCountBefore, const ch
     const auto* data = ReadAt<const uint8_t*>(groups, 0);
     if (!data || count == 0)
         return;
-    const uint8_t* entry = data + static_cast<size_t>(count - 1) * 0x80;
-    const char* name = ReadAt<const char*>(entry, 0x60);
+    const uint8_t* entry = data + static_cast<size_t>(count - 1) * 0xC0; // 2.5.0 entry size (2.3.1: 0x80)
+    const char* name = ReadAt<const char*>(entry, 0xA0);
     Mac::R21Check(ReadAt<uint8_t>(entry, 0) == 0, "the appended entry is in group 0 (FrameBegin)");
-    Mac::R21Check(ReadAt<uint64_t>(entry, 0x28) != 0, "the appended entry has a callback handler");
+    Mac::R21Check(ReadAt<uint64_t>(entry, 0x48) != 0, "the appended entry has a callback handler");
     Mac::R21Check(name && std::strcmp(name, aName) == 0, "the appended entry carries the system's tick name");
-    Mac::R21Check(ReadAt<uint32_t>(entry, 0x68) == 0xA, "the appended entry carries the live argument 0xA");
-    Mac::R21Check(ReadAt<uint64_t>(entry, 0x58) != 0, "the appended entry carries the system's class");
+    Mac::R21Check(ReadAt<uint32_t>(entry, 0xA8) == 0xA, "the appended entry carries the live argument 0xA");
+    Mac::R21Check(ReadAt<uint64_t>(entry, 0x98) != 0, "the appended entry carries the system's class");
     // The first word of the callback buffer is the system the member function is bound to.
     Mac::R21Check(ReadAt<uint64_t>(entry, 0x8) == reinterpret_cast<uint64_t>(aSystem), "the callback is bound to the system");
 }

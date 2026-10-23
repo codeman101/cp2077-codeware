@@ -7,7 +7,7 @@ namespace App
 // function that reads it (Windows 0x1B3B5C reads [this+0x200] and sets bit 3 of [this+0x25B]; the Mac twin 0xC7D688 reads [this+0x1F8]
 // and sets bit 3 of [this+0x253]) and guarded at build time (macos/MacLayoutGuard.cpp).
 #if defined(__APPLE__)
-constexpr uint32_t SkinnedMeshHandleOffset = 0x1F8;
+constexpr uint32_t SkinnedMeshHandleOffset = 0x200; // Mac 2.5.0: 0x200, as on Windows (2.3.1: 0x1F8; Mac 0x198FDA0 reads [this+0x200])
 #else
 constexpr uint32_t SkinnedMeshHandleOffset = 0x200;
 #endif

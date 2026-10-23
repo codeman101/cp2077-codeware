@@ -271,9 +271,9 @@ void RegisterCallbackChain()
         return;
     }
 
-    auto postLoad = system->RegisterStaticCallback(Red::CName("Resource/PostLoad"), Red::CName("CodewareMacSelfTest"),
+    auto postLoad = system->RegisterStaticCallbackImpl(Red::CName("Resource/PostLoad"), Red::CName("CodewareMacSelfTest"),
                                                    Red::CName("OnResource"), {});
-    auto load = system->RegisterStaticCallback(Red::CName("Resource/Load"), Red::CName("CodewareMacSelfTest"),
+    auto load = system->RegisterStaticCallbackImpl(Red::CName("Resource/Load"), Red::CName("CodewareMacSelfTest"),
                                                Red::CName("OnResource"), {});
     MAC_DIAG( "[selftest] r13 callback register postload nonnull=%d static=%d load nonnull=%d static=%d\n",
                  postLoad ? 1 : 0, (postLoad && postLoad->IsStatic()) ? 1 : 0, load ? 1 : 0,
@@ -564,7 +564,7 @@ void Mac::R18RegisterEventCallbacks()
         {
             break;
         }
-        auto handler = system->RegisterStaticCallback(name, Red::CName("CodewareMacSelfTest"), Red::CName("OnAnyEvent"), {});
+        auto handler = system->RegisterStaticCallbackImpl(name, Red::CName("CodewareMacSelfTest"), Red::CName("OnAnyEvent"), {});
         if (!handler || !handler->IsStatic() || !handler->IsRegistered())
         {
             ++failed;

@@ -82,6 +82,7 @@ set(CODEWARE_SOURCES
     ../src/App/Entity/EntityEx.cpp
     ../src/App/Scripting/ScriptableServiceContainer.cpp
     ../src/App/Scripting/ScriptingService.cpp
+    ../src/App/Scripting/VanillaApiCompat.cpp
     ../src/App/Localization/LocalizationService.cpp
     ../src/App/Localization/Language.cpp
     ../src/App/Entity/PersistencyService.cpp

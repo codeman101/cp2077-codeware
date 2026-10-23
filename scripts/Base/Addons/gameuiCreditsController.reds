@@ -1,8 +1,17 @@
 @addField(gameuiCreditsController)
-public native let creditsResourcePS4: ResourceRef; // rRef<inkCreditsResource>
+public native let creditsResourceXBOX: ResourceRef; // rRef<inkCreditsResource>
 
 @addField(gameuiCreditsController)
-public native let creditsResourceXBOXPC: ResourceRef; // rRef<inkCreditsResource>
+public native let creditsResourcePC: ResourceRef; // rRef<inkCreditsResource>
+
+@addField(gameuiCreditsController)
+public native let creditsResourceEmporium: ResourceRef; // rRef<inkCreditsResource>
+
+@addField(gameuiCreditsController)
+public native let creditsResourceMac: ResourceRef; // rRef<inkCreditsResource>
+
+@addField(gameuiCreditsController)
+public native let creditsResourcePS5: ResourceRef; // rRef<inkCreditsResource>
 
 @addField(gameuiCreditsController)
 public native let scrollingSpeed: Float;
