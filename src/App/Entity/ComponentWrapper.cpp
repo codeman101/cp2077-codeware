@@ -402,7 +402,7 @@ bool App::ComponentWrapper::ResetMaterialCache() const
         break;
     case ComponentType::SkinnedMeshComponent:
     case ComponentType::GarmentSkinnedMeshComponent:
-        // The SDK member sits at 0x1F8 in the Mac layout (the compiler reuses the base's tail padding; asserted by macos/MacLayoutGuard.cpp).
+        // The SDK member sits at 0x200 in the Mac 2.5 layout (2.3.1: 0x1F8; asserted by macos/MacLayoutGuard.cpp).
         meshHandle = reinterpret_cast<Red::ent::SkinnedMeshComponent*>(m_component)->meshHandle;
         meshAppName = GetComponentAppearanceName(reinterpret_cast<Red::ent::SkinnedMeshComponent*>(m_component));
         break;

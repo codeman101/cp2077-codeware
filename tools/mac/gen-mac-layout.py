@@ -40,7 +40,7 @@ CODEWARE_PROPS = {
 
 # Offsets of unreflected SDK members, verified in the game's code by a Windows/Mac function twin: (qualified class, member, Mac offset, evidence).
 MANUAL_ASSERTS = [
-    ('RED4ext::ent::SkinnedMeshComponent', 'meshHandle', 0x1F8, 'Windows 0x1B3B5C reads [this+0x200], Mac twin 0xC7D688 reads [this+0x1F8]'),
+    ('RED4ext::ent::SkinnedMeshComponent', 'meshHandle', 0x200, 'Windows 0x1B3B5C reads [this+0x200], Mac 2.5.0 twin 0x198FDA0 reads [this+0x200] (2.3.1: 0xC7D688, +0x1F8)'),
 ]
 
 SDK_SKIP = {
