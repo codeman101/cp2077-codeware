@@ -6,6 +6,7 @@ Codeware-src/Base/Imports/oauthAuthenticationToken.reds
 Codeware-src/Base/Imports/toolsJiraService.reds
 Codeware-src/Base/Imports/toolsMessage.reds          # Mac native created is MemInt, the script says Int64
 Codeware-src/Base/Imports/InheritedStructs/FSR30CustomData.reds
+Codeware-src/Base/Imports/InheritedStructs/Odyssey3DCustomData.reds   # 2.5: Windows-only native struct (not in the Mac 2.5 reflection)
 Codeware-src/Base/Imports/InheritedStructs/inputInputSystemEditor.reds
 Codeware-src/Base/Imports/InheritedStructs/inputInputSystemWin32Base.reds
 Codeware-src/Base/Imports/InheritedStructs/inputInputSystemWin32Game.reds
