@@ -38,6 +38,7 @@
         { 2715367827, 0x10B0C08 },  // ISerializable_sub_78. Mac: Handle(this, a1, a2 byte, a3, a4) with the Handle through x8 (the SDK signature models a hidden first argument). Windows 0x711A14.
         { 3978435378, 0x10b0b6c },  // ISerializable_sub_A0. The base default (GetType()->GetDefaultObject). The address table's Windows 0xB9A864 is a CResource override; the twin is 0x1247898.
         { 2149588021, 0x10b0b44 },  // ISerializable_sub_C0. The base default: the owning CResource's +0x30, returned in x0. The address table's Windows 0x81DA2C is unrelated; the twin is 0x4B0D9C.
+        { 3689484881, 0x10b0b44 },  // ISerializable_sub_C0: the 2.5 hash of the same function (upstream 0f5eba42a renamed it)
         { 4175699423, 0x11e4da0 },  // IScriptable_sub_D8. void(this, unused, visitor). Windows 0x205FE10.
         // R19 B3. Resource loader and token. The SharedPtr, Handle and JobHandle results come back through x8 on Mac; the SDK
         // wrappers (ResourceLoader.hpp) are reshaped under __APPLE__.
@@ -51,5 +52,7 @@
         // MAC-NOT-YET: ResourceToken_DestructUnk38 (Windows 0x28B814) has no Mac function; the game inlines that release in ~ResourceToken (0x21C4A54 to 0x21C4ACC). The SDK ~ResourceToken skips it on Apple, so a token the SDK destroys leaks its Unk38 request object. Not applicable as a row.
         // R21 B5. The update registrar is called through the SDK's own UniversalRelocFunc (SystemUpdate-inl.hpp), so these two rows live here.
         { 4254156293, 0x4D74AB0 },  // UpdateRegistrar_RegisterGroupUpdate. void(registrar, group, CClass*, name, callback&&, w5 = 0xA): the last argument is live on Mac (all 128 game call sites pass 0xA). Windows 0x624D54.
+        { 4259268103, 0x4D74AB0 },  // UpdateRegistrar_RegisterGroupUpdate: the 2.5 hash of the same function (upstream 0f5eba42a renamed it)
         { 422530722,  0x4D74C20 },  // UpdateRegistrar_RegisterBucketUpdate. void(registrar, mask, stage, CClass*, name, callback&&, w6 = 0xD): live on Mac (all 64 game call sites pass 0xD). Windows 0x62575C.
+        { 427642532, 0x4D74C20 },  // UpdateRegistrar_RegisterBucketUpdate: the 2.5 hash of the same function (upstream 0f5eba42a renamed it)
         { 4125893577, 0x1215524 },  // DeferredDataBuffer_LoadAsync. LoadResult(DeferredDataBuffer*, int64 a3): a 16 byte result through x8 whose JobHandle is at result+8 (the game never writes result+0); Windows: JobHandle* out in rdx. R22 body twin of Windows 0xB0762C: lock byte at this+0x55 (xchg / swpalb), counter at this+0x50, a JobQueue, the load job; callers include the ArchiveXL resource patch (compiledData.LoadAsync).
