@@ -65,7 +65,6 @@ set(CODEWARE_SOURCES
     MacR20.cpp
     MacR21.cpp
     MacR25.cpp
-    MacLayoutGuard.cpp
     MacR16a.cpp
     MacR16b.cpp
     MacR17.cpp
@@ -155,7 +154,14 @@ file(WRITE "${SDK_OVERLAY}/RED4ext/Relocation-inl.hpp" "${SDK_RELOC_TEXT}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${SDK_RELOC}" "${SDK_ROWS_INC}")
 message(STATUS "R16a: SDK Mac table overlay written to ${SDK_OVERLAY}")
 
+# 2.5: the generated layout guard asserts the Mac reflection-dump layouts. Leave it out (-DMAC_LAYOUT_GUARD=OFF) only for the build
+# that takes a new reflection dump; regenerate it with tools/mac/gen-mac-layout.py and build with the guard again afterwards.
+option(MAC_LAYOUT_GUARD "Build macos/MacLayoutGuard.cpp (generated layout asserts)" ON)
+
 add_library(Codeware SHARED ${CODEWARE_SOURCES})
+if(MAC_LAYOUT_GUARD)
+    target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/MacLayoutGuard.cpp")
+endif()
 
 set_target_properties(Codeware PROPERTIES
     OUTPUT_NAME "Codeware"
