@@ -5,6 +5,7 @@
 #include <RED4ext/Api/Sdk.hpp>
 #include <RED4ext/Api/SemVer.hpp>
 #include <RED4ext/CName.hpp>
+#include <RED4ext/CString.hpp>
 #include <RED4ext/Common.hpp>
 #include <RED4ext/Detail/Memory.hpp>
 #include <RED4ext/DynArray.hpp>
@@ -37,6 +38,7 @@
 #include <RED4ext/Scripting/Natives/Generated/Vector4.hpp>
 #include <RED4ext/Scripting/Natives/Generated/appearance/AppearanceDefinition.hpp>
 #include <RED4ext/Scripting/Natives/Generated/appearance/AppearanceResource.hpp>
+#include <RED4ext/Scripting/Natives/Generated/audio/DialogLineEventData.hpp>
 #include <RED4ext/Scripting/Natives/Generated/community/CommunityTemplateData.hpp>
 #include <RED4ext/Scripting/Natives/Generated/community/SpawnEntry.hpp>
 #include <RED4ext/Scripting/Natives/Generated/community/SpawnInitializer.hpp>
@@ -345,31 +347,31 @@ static_assert(__builtin_offsetof(RED4ext::ent::IPlacedComponent, worldTransform)
 static_assert(__builtin_offsetof(RED4ext::ent::IPlacedComponent, parentTransform) == 0x90, "RED4ext::ent::IPlacedComponent::parentTransform");
 static_assert(__builtin_offsetof(RED4ext::ent::IPlacedComponent, localTransform) == 0xC0, "RED4ext::ent::IPlacedComponent::localTransform");
 static_assert(__builtin_offsetof(RED4ext::ent::IPlacedComponent, worldTransform) == 0xE0, "RED4ext::ent::IPlacedComponent::worldTransform");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, morphResource) == 0x1F8, "RED4ext::ent::MorphTargetSkinnedMeshComponent::morphResource");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, meshAppearance) == 0x230, "RED4ext::ent::MorphTargetSkinnedMeshComponent::meshAppearance");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, chunkMask) == 0x238, "RED4ext::ent::MorphTargetSkinnedMeshComponent::chunkMask");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, renderingPlaneAnimationParam) == 0x2E0, "RED4ext::ent::MorphTargetSkinnedMeshComponent::renderingPlaneAnimationParam");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, visibilityAnimationParam) == 0x2E8, "RED4ext::ent::MorphTargetSkinnedMeshComponent::visibilityAnimationParam");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, tags) == 0x300, "RED4ext::ent::MorphTargetSkinnedMeshComponent::tags");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, castShadows) == 0x354, "RED4ext::ent::MorphTargetSkinnedMeshComponent::castShadows");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, castLocalShadows) == 0x355, "RED4ext::ent::MorphTargetSkinnedMeshComponent::castLocalShadows");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, acceptDismemberment) == 0x356, "RED4ext::ent::MorphTargetSkinnedMeshComponent::acceptDismemberment");
-static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, version) == 0x359, "RED4ext::ent::MorphTargetSkinnedMeshComponent::version");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, mesh) == 0x220, "RED4ext::ent::SkinnedMeshComponent::mesh");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, meshAppearance) == 0x228, "RED4ext::ent::SkinnedMeshComponent::meshAppearance");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, renderingPlaneAnimationParam) == 0x230, "RED4ext::ent::SkinnedMeshComponent::renderingPlaneAnimationParam");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, visibilityAnimationParam) == 0x238, "RED4ext::ent::SkinnedMeshComponent::visibilityAnimationParam");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, chunkMask) == 0x240, "RED4ext::ent::SkinnedMeshComponent::chunkMask");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, navigationImpact) == 0x248, "RED4ext::ent::SkinnedMeshComponent::navigationImpact");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, LODMode) == 0x24A, "RED4ext::ent::SkinnedMeshComponent::LODMode");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, order) == 0x24D, "RED4ext::ent::SkinnedMeshComponent::order");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, castShadows) == 0x24E, "RED4ext::ent::SkinnedMeshComponent::castShadows");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, castLocalShadows) == 0x24F, "RED4ext::ent::SkinnedMeshComponent::castLocalShadows");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, useProxyMeshAsShadowMesh) == 0x250, "RED4ext::ent::SkinnedMeshComponent::useProxyMeshAsShadowMesh");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, acceptDismemberment) == 0x251, "RED4ext::ent::SkinnedMeshComponent::acceptDismemberment");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, overrideMeshNavigationImpact) == 0x252, "RED4ext::ent::SkinnedMeshComponent::overrideMeshNavigationImpact");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, forcedLodDistance) == 0x255, "RED4ext::ent::SkinnedMeshComponent::forcedLodDistance");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, version) == 0x260, "RED4ext::ent::SkinnedMeshComponent::version");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, morphResource) == 0x200, "RED4ext::ent::MorphTargetSkinnedMeshComponent::morphResource");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, meshAppearance) == 0x238, "RED4ext::ent::MorphTargetSkinnedMeshComponent::meshAppearance");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, chunkMask) == 0x240, "RED4ext::ent::MorphTargetSkinnedMeshComponent::chunkMask");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, renderingPlaneAnimationParam) == 0x2E8, "RED4ext::ent::MorphTargetSkinnedMeshComponent::renderingPlaneAnimationParam");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, visibilityAnimationParam) == 0x2F0, "RED4ext::ent::MorphTargetSkinnedMeshComponent::visibilityAnimationParam");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, tags) == 0x308, "RED4ext::ent::MorphTargetSkinnedMeshComponent::tags");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, castShadows) == 0x35C, "RED4ext::ent::MorphTargetSkinnedMeshComponent::castShadows");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, castLocalShadows) == 0x35D, "RED4ext::ent::MorphTargetSkinnedMeshComponent::castLocalShadows");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, acceptDismemberment) == 0x35E, "RED4ext::ent::MorphTargetSkinnedMeshComponent::acceptDismemberment");
+static_assert(__builtin_offsetof(RED4ext::ent::MorphTargetSkinnedMeshComponent, version) == 0x361, "RED4ext::ent::MorphTargetSkinnedMeshComponent::version");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, mesh) == 0x228, "RED4ext::ent::SkinnedMeshComponent::mesh");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, meshAppearance) == 0x230, "RED4ext::ent::SkinnedMeshComponent::meshAppearance");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, renderingPlaneAnimationParam) == 0x238, "RED4ext::ent::SkinnedMeshComponent::renderingPlaneAnimationParam");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, visibilityAnimationParam) == 0x240, "RED4ext::ent::SkinnedMeshComponent::visibilityAnimationParam");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, chunkMask) == 0x248, "RED4ext::ent::SkinnedMeshComponent::chunkMask");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, navigationImpact) == 0x250, "RED4ext::ent::SkinnedMeshComponent::navigationImpact");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, LODMode) == 0x252, "RED4ext::ent::SkinnedMeshComponent::LODMode");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, order) == 0x255, "RED4ext::ent::SkinnedMeshComponent::order");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, castShadows) == 0x256, "RED4ext::ent::SkinnedMeshComponent::castShadows");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, castLocalShadows) == 0x257, "RED4ext::ent::SkinnedMeshComponent::castLocalShadows");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, useProxyMeshAsShadowMesh) == 0x258, "RED4ext::ent::SkinnedMeshComponent::useProxyMeshAsShadowMesh");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, acceptDismemberment) == 0x259, "RED4ext::ent::SkinnedMeshComponent::acceptDismemberment");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, overrideMeshNavigationImpact) == 0x25A, "RED4ext::ent::SkinnedMeshComponent::overrideMeshNavigationImpact");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, forcedLodDistance) == 0x25D, "RED4ext::ent::SkinnedMeshComponent::forcedLodDistance");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, version) == 0x268, "RED4ext::ent::SkinnedMeshComponent::version");
 static_assert(sizeof(RED4ext::ent::SkinnedMeshComponent) == 624, "sizeof(RED4ext::ent::SkinnedMeshComponent)");
 static_assert(sizeof(RED4ext::game::IPersistencySystem) == 72, "sizeof(RED4ext::game::IPersistencySystem)");
 static_assert(__builtin_offsetof(RED4ext::game::PersistentID, componentName) == 0x8, "RED4ext::game::PersistentID::componentName");
@@ -429,10 +431,10 @@ static_assert(__builtin_offsetof(RED4ext::red::TagList, tags) == 0x0, "RED4ext::
 static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, isOnGround) == 0x25C, "RED4ext::vehicle::BaseObject::isOnGround");
 static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, acceleration) == 0x264, "RED4ext::vehicle::BaseObject::acceleration");
 static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, deceleration) == 0x268, "RED4ext::vehicle::BaseObject::deceleration");
-static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, isReversing) == 0x2A3, "RED4ext::vehicle::BaseObject::isReversing");
-static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, burnout) == 0x2BC, "RED4ext::vehicle::BaseObject::burnout");
-static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, archetype) == 0x3A0, "RED4ext::vehicle::BaseObject::archetype");
-static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, isVehicleOnStateLocked) == 0x6D2, "RED4ext::vehicle::BaseObject::isVehicleOnStateLocked");
+static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, isReversing) == 0x2AB, "RED4ext::vehicle::BaseObject::isReversing");
+static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, burnout) == 0x2C4, "RED4ext::vehicle::BaseObject::burnout");
+static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, archetype) == 0x3B0, "RED4ext::vehicle::BaseObject::archetype");
+static_assert(__builtin_offsetof(RED4ext::vehicle::BaseObject, isVehicleOnStateLocked) == 0x6F2, "RED4ext::vehicle::BaseObject::isVehicleOnStateLocked");
 static_assert(__builtin_offsetof(RED4ext::AbsolutePathSerializable, Path) == 0x0, "RED4ext::AbsolutePathSerializable::Path");
 static_assert(__builtin_offsetof(RED4ext::Color, Red) == 0x0, "RED4ext::Color::Red");
 static_assert(__builtin_offsetof(RED4ext::Color, Green) == 0x1, "RED4ext::Color::Green");
@@ -446,17 +448,19 @@ static_assert(__builtin_offsetof(RED4ext::ContactShadowsConfig, distanceFadeRang
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, width) == 0x3C, "RED4ext::DynamicTexture::width");
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, height) == 0x40, "RED4ext::DynamicTexture::height");
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, scaleToViewport) == 0x44, "RED4ext::DynamicTexture::scaleToViewport");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, dataFormat) == 0x50, "RED4ext::DynamicTexture::dataFormat");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, mipChain) == 0x51, "RED4ext::DynamicTexture::mipChain");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, samplesCount) == 0x52, "RED4ext::DynamicTexture::samplesCount");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, generator) == 0x80, "RED4ext::DynamicTexture::generator");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, viewportScale) == 0x48, "RED4ext::DynamicTexture::viewportScale");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, dataFormat) == 0x54, "RED4ext::DynamicTexture::dataFormat");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, mipChain) == 0x55, "RED4ext::DynamicTexture::mipChain");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, samplesCount) == 0x56, "RED4ext::DynamicTexture::samplesCount");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, generator) == 0x88, "RED4ext::DynamicTexture::generator");
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, width) == 0x3C, "RED4ext::DynamicTexture::width");
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, height) == 0x40, "RED4ext::DynamicTexture::height");
 static_assert(__builtin_offsetof(RED4ext::DynamicTexture, scaleToViewport) == 0x44, "RED4ext::DynamicTexture::scaleToViewport");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, dataFormat) == 0x50, "RED4ext::DynamicTexture::dataFormat");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, mipChain) == 0x51, "RED4ext::DynamicTexture::mipChain");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, samplesCount) == 0x52, "RED4ext::DynamicTexture::samplesCount");
-static_assert(__builtin_offsetof(RED4ext::DynamicTexture, generator) == 0x80, "RED4ext::DynamicTexture::generator");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, viewportScale) == 0x48, "RED4ext::DynamicTexture::viewportScale");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, dataFormat) == 0x54, "RED4ext::DynamicTexture::dataFormat");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, mipChain) == 0x55, "RED4ext::DynamicTexture::mipChain");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, samplesCount) == 0x56, "RED4ext::DynamicTexture::samplesCount");
+static_assert(__builtin_offsetof(RED4ext::DynamicTexture, generator) == 0x88, "RED4ext::DynamicTexture::generator");
 static_assert(__builtin_offsetof(RED4ext::EulerAngles, Roll) == 0x0, "RED4ext::EulerAngles::Roll");
 static_assert(__builtin_offsetof(RED4ext::EulerAngles, Pitch) == 0x4, "RED4ext::EulerAngles::Pitch");
 static_assert(__builtin_offsetof(RED4ext::EulerAngles, Yaw) == 0x8, "RED4ext::EulerAngles::Yaw");
@@ -552,8 +556,8 @@ static_assert(__builtin_offsetof(RED4ext::ink::CompoundWidget, childOrder) == 0x
 static_assert(__builtin_offsetof(RED4ext::ink::CompoundWidget, childMargin) == 0x214, "RED4ext::ink::CompoundWidget::childMargin");
 static_assert(sizeof(RED4ext::ink::CompoundWidget) == 560, "sizeof(RED4ext::ink::CompoundWidget)");
 static_assert(sizeof(RED4ext::ink::Event) == 104, "sizeof(RED4ext::ink::Event)");
-static_assert(__builtin_offsetof(RED4ext::ink::IEffect, isEnabled) == 0x40, "RED4ext::ink::IEffect::isEnabled");
-static_assert(__builtin_offsetof(RED4ext::ink::IEffect, effectName) == 0x48, "RED4ext::ink::IEffect::effectName");
+static_assert(__builtin_offsetof(RED4ext::ink::IEffect, isEnabled) == 0x50, "RED4ext::ink::IEffect::isEnabled");
+static_assert(__builtin_offsetof(RED4ext::ink::IEffect, effectName) == 0x58, "RED4ext::ink::IEffect::effectName");
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, SavesForSaveReady) == 0x40, "RED4ext::ink::ISystemRequestsHandler::SavesForSaveReady");
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, SavesForLoadReady) == 0x78, "RED4ext::ink::ISystemRequestsHandler::SavesForLoadReady");
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, SaveMetadataReady) == 0xB0, "RED4ext::ink::ISystemRequestsHandler::SaveMetadataReady");
@@ -567,16 +571,17 @@ static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, Favorites
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, DeleteSreenshotComplete) == 0x270, "RED4ext::ink::ISystemRequestsHandler::DeleteSreenshotComplete");
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, SaveDeleted) == 0x2A8, "RED4ext::ink::ISystemRequestsHandler::SaveDeleted");
 static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, SaveTransferUpdate) == 0x2E0, "RED4ext::ink::ISystemRequestsHandler::SaveTransferUpdate");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentPurchaseResult) == 0x318, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentPurchaseResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentInstallationRequestResult) == 0x350, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentInstallationRequestResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentInstallationResult) == 0x388, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentInstallationResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentStatusUpdateResult) == 0x3C0, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentStatusUpdateResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentDataReloadProgressCallback) == 0x3F8, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentDataReloadProgressCallback");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, ToggleBreachingCallback) == 0x430, "RED4ext::ink::ISystemRequestsHandler::ToggleBreachingCallback");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, UserIdResult) == 0x468, "RED4ext::ink::ISystemRequestsHandler::UserIdResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, UserChanged) == 0x4A0, "RED4ext::ink::ISystemRequestsHandler::UserChanged");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, ServersSearchResult) == 0x4D8, "RED4ext::ink::ISystemRequestsHandler::ServersSearchResult");
-static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, MarketingConsentPopupTypeResult) == 0x510, "RED4ext::ink::ISystemRequestsHandler::MarketingConsentPopupTypeResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, TelemetryDataRemovalCallback) == 0x318, "RED4ext::ink::ISystemRequestsHandler::TelemetryDataRemovalCallback");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentPurchaseResult) == 0x350, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentPurchaseResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentInstallationRequestResult) == 0x388, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentInstallationRequestResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentInstallationResult) == 0x3C0, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentInstallationResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentStatusUpdateResult) == 0x3F8, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentStatusUpdateResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, AdditionalContentDataReloadProgressCallback) == 0x430, "RED4ext::ink::ISystemRequestsHandler::AdditionalContentDataReloadProgressCallback");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, ToggleBreachingCallback) == 0x468, "RED4ext::ink::ISystemRequestsHandler::ToggleBreachingCallback");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, GogSignInCallback) == 0x4A0, "RED4ext::ink::ISystemRequestsHandler::GogSignInCallback");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, UserIdResult) == 0x4D8, "RED4ext::ink::ISystemRequestsHandler::UserIdResult");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, UserChanged) == 0x510, "RED4ext::ink::ISystemRequestsHandler::UserChanged");
+static_assert(__builtin_offsetof(RED4ext::ink::ISystemRequestsHandler, ServersSearchResult) == 0x548, "RED4ext::ink::ISystemRequestsHandler::ServersSearchResult");
 static_assert(__builtin_offsetof(RED4ext::ink::IWidgetController, audioMetadataName) == 0x70, "RED4ext::ink::IWidgetController::audioMetadataName");
 static_assert(__builtin_offsetof(RED4ext::ink::ImageWidget, textureAtlas) == 0x200, "RED4ext::ink::ImageWidget::textureAtlas");
 static_assert(__builtin_offsetof(RED4ext::ink::ImageWidget, texturePart) == 0x208, "RED4ext::ink::ImageWidget::texturePart");
@@ -669,10 +674,12 @@ static_assert(__builtin_offsetof(RED4ext::ent::IAttachment, destination) == 0x40
 static_assert(__builtin_offsetof(RED4ext::ent::IBinding, enabled) == 0x30, "RED4ext::ent::IBinding::enabled");
 static_assert(__builtin_offsetof(RED4ext::ent::IBinding, enableMask) == 0x38, "RED4ext::ent::IBinding::enableMask");
 static_assert(__builtin_offsetof(RED4ext::ent::IBinding, bindName) == 0x68, "RED4ext::ent::IBinding::bindName");
-static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, skinning) == 0x180, "RED4ext::ent::ISkinTargetComponent::skinning");
-static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, useSkinningLOD) == 0x1D0, "RED4ext::ent::ISkinTargetComponent::useSkinningLOD");
-static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, skinning) == 0x180, "RED4ext::ent::ISkinTargetComponent::skinning");
-static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, useSkinningLOD) == 0x1D0, "RED4ext::ent::ISkinTargetComponent::useSkinningLOD");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, boundingBoxLocalBoundsOverride) == 0x180, "RED4ext::ent::ISkinTargetComponent::boundingBoxLocalBoundsOverride");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, skinning) == 0x188, "RED4ext::ent::ISkinTargetComponent::skinning");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, useSkinningLOD) == 0x1D8, "RED4ext::ent::ISkinTargetComponent::useSkinningLOD");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, boundingBoxLocalBoundsOverride) == 0x180, "RED4ext::ent::ISkinTargetComponent::boundingBoxLocalBoundsOverride");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, skinning) == 0x188, "RED4ext::ent::ISkinTargetComponent::skinning");
+static_assert(__builtin_offsetof(RED4ext::ent::ISkinTargetComponent, useSkinningLOD) == 0x1D8, "RED4ext::ent::ISkinTargetComponent::useSkinningLOD");
 static_assert(sizeof(RED4ext::ent::ISkinTargetComponent) == 480, "sizeof(RED4ext::ent::ISkinTargetComponent)");
 static_assert(__builtin_offsetof(RED4ext::ent::IVisualComponent, autoHideDistance) == 0x120, "RED4ext::ent::IVisualComponent::autoHideDistance");
 static_assert(__builtin_offsetof(RED4ext::ent::IVisualComponent, forceLODLevel) == 0x125, "RED4ext::ent::IVisualComponent::forceLODLevel");
@@ -905,39 +912,22 @@ static_assert(__builtin_offsetof(RED4ext::world::EnvironmentDefinition, weatherS
 static_assert(__builtin_offsetof(RED4ext::world::EnvironmentDefinition, weatherStateTransitions) == 0x198, "RED4ext::world::EnvironmentDefinition::weatherStateTransitions");
 static_assert(__builtin_offsetof(RED4ext::world::GlobalNodeID, hash) == 0x0, "RED4ext::world::GlobalNodeID::hash");
 static_assert(sizeof(RED4ext::world::INodeInstance) == 144, "sizeof(RED4ext::world::INodeInstance)");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, worldTransformsBuffer) == 0x38, "RED4ext::world::InstancedMeshNode::worldTransformsBuffer");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, mesh) == 0x80, "RED4ext::world::InstancedMeshNode::mesh");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, meshAppearance) == 0x88, "RED4ext::world::InstancedMeshNode::meshAppearance");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, meshLODScales) == 0x90, "RED4ext::world::InstancedMeshNode::meshLODScales");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, occluderType) == 0x94, "RED4ext::world::InstancedMeshNode::occluderType");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, occluderAutohideDistanceScale) == 0x95, "RED4ext::world::InstancedMeshNode::occluderAutohideDistanceScale");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, castShadows) == 0x97, "RED4ext::world::InstancedMeshNode::castShadows");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, castLocalShadows) == 0x98, "RED4ext::world::InstancedMeshNode::castLocalShadows");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, version) == 0x99, "RED4ext::world::InstancedMeshNode::version");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, worldTransformsBuffer) == 0x38, "RED4ext::world::InstancedMeshNode::worldTransformsBuffer");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, mesh) == 0x80, "RED4ext::world::InstancedMeshNode::mesh");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, meshAppearance) == 0x88, "RED4ext::world::InstancedMeshNode::meshAppearance");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, meshLODScales) == 0x90, "RED4ext::world::InstancedMeshNode::meshLODScales");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, occluderType) == 0x94, "RED4ext::world::InstancedMeshNode::occluderType");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, occluderAutohideDistanceScale) == 0x95, "RED4ext::world::InstancedMeshNode::occluderAutohideDistanceScale");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, castShadows) == 0x97, "RED4ext::world::InstancedMeshNode::castShadows");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, castLocalShadows) == 0x98, "RED4ext::world::InstancedMeshNode::castLocalShadows");
-static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, version) == 0x99, "RED4ext::world::InstancedMeshNode::version");
+static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, cookedWorldTransformsBuffer) == 0x38, "RED4ext::world::InstancedMeshNode::cookedWorldTransformsBuffer");
+static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, version) == 0x90, "RED4ext::world::InstancedMeshNode::version");
+static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, cookedWorldTransformsBuffer) == 0x38, "RED4ext::world::InstancedMeshNode::cookedWorldTransformsBuffer");
+static_assert(__builtin_offsetof(RED4ext::world::InstancedMeshNode, version) == 0x90, "RED4ext::world::InstancedMeshNode::version");
 static_assert(__builtin_offsetof(RED4ext::world::Node, isVisibleInGame) == 0x30, "RED4ext::world::Node::isVisibleInGame");
 static_assert(__builtin_offsetof(RED4ext::world::Node, isHostOnly) == 0x31, "RED4ext::world::Node::isHostOnly");
-static_assert(__builtin_offsetof(RED4ext::world::RenderProxyTransformBuffer, sharedDataBuffer) == 0x0, "RED4ext::world::RenderProxyTransformBuffer::sharedDataBuffer");
-static_assert(__builtin_offsetof(RED4ext::world::RenderProxyTransformBuffer, startIndex) == 0x10, "RED4ext::world::RenderProxyTransformBuffer::startIndex");
-static_assert(__builtin_offsetof(RED4ext::world::RenderProxyTransformBuffer, numElements) == 0x14, "RED4ext::world::RenderProxyTransformBuffer::numElements");
 static_assert(sizeof(RED4ext::world::RuntimeSystemWeather) == 560, "sizeof(RED4ext::world::RuntimeSystemWeather)");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingBlock, descriptors) == 0x40, "RED4ext::world::StreamingBlock::descriptors");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingBlock, index) == 0x50, "RED4ext::world::StreamingBlock::index");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingBlockIndex, rldGridCell) == 0x0, "RED4ext::world::StreamingBlockIndex::rldGridCell");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingBlockIndex, oup) == 0x4, "RED4ext::world::StreamingBlockIndex::oup");
-static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, localInplaceResource) == 0xA0, "RED4ext::world::StreamingSector::localInplaceResource");
-static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, externInplaceResource) == 0xC0, "RED4ext::world::StreamingSector::externInplaceResource");
-static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, level) == 0xD8, "RED4ext::world::StreamingSector::level");
-static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, category) == 0xD9, "RED4ext::world::StreamingSector::category");
-static_assert(sizeof(RED4ext::world::StreamingSector) == 224, "sizeof(RED4ext::world::StreamingSector)");
+static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, localInplaceResource) == 0xA8, "RED4ext::world::StreamingSector::localInplaceResource");
+static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, externInplaceResource) == 0xC8, "RED4ext::world::StreamingSector::externInplaceResource");
+static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, level) == 0xE0, "RED4ext::world::StreamingSector::level");
+static_assert(__builtin_offsetof(RED4ext::world::StreamingSector, category) == 0xE1, "RED4ext::world::StreamingSector::category");
+static_assert(sizeof(RED4ext::world::StreamingSector) == 232, "sizeof(RED4ext::world::StreamingSector)");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingSectorDescriptor, streamingBox) == 0x0, "RED4ext::world::StreamingSectorDescriptor::streamingBox");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingSectorDescriptor, data) == 0x20, "RED4ext::world::StreamingSectorDescriptor::data");
 static_assert(__builtin_offsetof(RED4ext::world::StreamingSectorDescriptor, questPrefabNodeRef) == 0x28, "RED4ext::world::StreamingSectorDescriptor::questPrefabNodeRef");
@@ -1103,7 +1093,7 @@ static_assert(__builtin_offsetof(RED4ext::game::ui::CensorshipInfo, censorFlagAc
 static_assert(__builtin_offsetof(RED4ext::game::ui::CustomizationAppearance, name) == 0x10, "RED4ext::game::ui::CustomizationAppearance::name");
 static_assert(__builtin_offsetof(RED4ext::game::ui::CustomizationAppearance, resource) == 0x18, "RED4ext::game::ui::CustomizationAppearance::resource");
 static_assert(__builtin_offsetof(RED4ext::game::ui::CustomizationAppearance, definition) == 0x20, "RED4ext::game::ui::CustomizationAppearance::definition");
-static_assert(sizeof(RED4ext::game::mappins::MappinSystem) == 99456, "sizeof(RED4ext::game::mappins::MappinSystem)");
+static_assert(sizeof(RED4ext::game::mappins::MappinSystem) == 99520, "sizeof(RED4ext::game::mappins::MappinSystem)");
 static_assert(__builtin_offsetof(RED4ext::game::mappins::PhaseVariant, phase) == 0x30, "RED4ext::game::mappins::PhaseVariant::phase");
 static_assert(__builtin_offsetof(RED4ext::game::mappins::PhaseVariant, variant) == 0x34, "RED4ext::game::mappins::PhaseVariant::variant");
 static_assert(__builtin_offsetof(RED4ext::game::mappins::PointOfInterestMappinData, typedVariant) == 0x8, "RED4ext::game::mappins::PointOfInterestMappinData::typedVariant");
@@ -1115,6 +1105,15 @@ static_assert(__builtin_offsetof(RED4ext::game::mappins::PointOfInterestMappinDa
 static_assert(__builtin_offsetof(RED4ext::game::mappins::PointOfInterestMappinData, dynamicMappinDef) == 0x40, "RED4ext::game::mappins::PointOfInterestMappinData::dynamicMappinDef");
 static_assert(sizeof(RED4ext::red::Event) == 64, "sizeof(RED4ext::red::Event)");
 static_assert(__builtin_offsetof(RED4ext::red::ResourceReferenceScriptToken, resource) == 0x0, "RED4ext::red::ResourceReferenceScriptToken::resource");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, stringId) == 0x0, "RED4ext::audio::DialogLineEventData::stringId");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, context) == 0x8, "RED4ext::audio::DialogLineEventData::context");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, expression) == 0x9, "RED4ext::audio::DialogLineEventData::expression");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, isPlayer) == 0x10, "RED4ext::audio::DialogLineEventData::isPlayer");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, isRewind) == 0x11, "RED4ext::audio::DialogLineEventData::isRewind");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, isHolocall) == 0x12, "RED4ext::audio::DialogLineEventData::isHolocall");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, customVoEvent) == 0x18, "RED4ext::audio::DialogLineEventData::customVoEvent");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, seekTime) == 0x20, "RED4ext::audio::DialogLineEventData::seekTime");
+static_assert(__builtin_offsetof(RED4ext::audio::DialogLineEventData, playbackSpeedParameter) == 0x24, "RED4ext::audio::DialogLineEventData::playbackSpeedParameter");
 static_assert(__builtin_offsetof(RED4ext::quest::CharacterCondition, type) == 0x30, "RED4ext::quest::CharacterCondition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::CharacterKilled_ConditionType, comparisonParams) == 0x78, "RED4ext::quest::CharacterKilled_ConditionType::comparisonParams");
 static_assert(__builtin_offsetof(RED4ext::quest::CharacterKilled_ConditionType, source) == 0x88, "RED4ext::quest::CharacterKilled_ConditionType::source");
@@ -1135,6 +1134,14 @@ static_assert(__builtin_offsetof(RED4ext::quest::ComparisonParam, entireCommunit
 static_assert(__builtin_offsetof(RED4ext::quest::ComparisonParam, count) == 0x34, "RED4ext::quest::ComparisonParam::count");
 static_assert(__builtin_offsetof(RED4ext::quest::ComparisonParam, comparisonType) == 0x38, "RED4ext::quest::ComparisonParam::comparisonType");
 static_assert(__builtin_offsetof(RED4ext::quest::ConditionNodeDefinition, condition) == 0x48, "RED4ext::quest::ConditionNodeDefinition::condition");
+static_assert(__builtin_offsetof(RED4ext::quest::ConditionNodeDefinition, condition) == 0x48, "RED4ext::quest::ConditionNodeDefinition::condition");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, objectRef) == 0x48, "RED4ext::quest::EventManagerNodeDefinition::objectRef");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, managerName) == 0x80, "RED4ext::quest::EventManagerNodeDefinition::managerName");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, PSClassName) == 0xA0, "RED4ext::quest::EventManagerNodeDefinition::PSClassName");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, componentName) == 0xA8, "RED4ext::quest::EventManagerNodeDefinition::componentName");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, event) == 0xB0, "RED4ext::quest::EventManagerNodeDefinition::event");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, isUiEvent) == 0xC0, "RED4ext::quest::EventManagerNodeDefinition::isUiEvent");
+static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, isObjectPlayer) == 0xC1, "RED4ext::quest::EventManagerNodeDefinition::isObjectPlayer");
 static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, objectRef) == 0x48, "RED4ext::quest::EventManagerNodeDefinition::objectRef");
 static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, managerName) == 0x80, "RED4ext::quest::EventManagerNodeDefinition::managerName");
 static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, PSClassName) == 0xA0, "RED4ext::quest::EventManagerNodeDefinition::PSClassName");
@@ -1144,6 +1151,8 @@ static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, isU
 static_assert(__builtin_offsetof(RED4ext::quest::EventManagerNodeDefinition, isObjectPlayer) == 0xC1, "RED4ext::quest::EventManagerNodeDefinition::isObjectPlayer");
 static_assert(__builtin_offsetof(RED4ext::quest::FactsDBCondition, type) == 0x30, "RED4ext::quest::FactsDBCondition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::FactsDBManagerNodeDefinition, type) == 0x48, "RED4ext::quest::FactsDBManagerNodeDefinition::type");
+static_assert(__builtin_offsetof(RED4ext::quest::FactsDBManagerNodeDefinition, type) == 0x48, "RED4ext::quest::FactsDBManagerNodeDefinition::type");
+static_assert(__builtin_offsetof(RED4ext::quest::IONodeDefinition, socketName) == 0x48, "RED4ext::quest::IONodeDefinition::socketName");
 static_assert(__builtin_offsetof(RED4ext::quest::IONodeDefinition, socketName) == 0x48, "RED4ext::quest::IONodeDefinition::socketName");
 static_assert(__builtin_offsetof(RED4ext::quest::Interaction_ConditionType, objectRef) == 0x38, "RED4ext::quest::Interaction_ConditionType::objectRef");
 static_assert(__builtin_offsetof(RED4ext::quest::Interaction_ConditionType, eventType) == 0x40, "RED4ext::quest::Interaction_ConditionType::eventType");
@@ -1179,6 +1188,7 @@ static_assert(__builtin_offsetof(RED4ext::quest::JournalEntry_ConditionType, sta
 static_assert(__builtin_offsetof(RED4ext::quest::JournalEntry_NodeType, sendNotification) == 0x4C, "RED4ext::quest::JournalEntry_NodeType::sendNotification");
 static_assert(__builtin_offsetof(RED4ext::quest::JournalEntry_NodeType, sendNotification) == 0x4C, "RED4ext::quest::JournalEntry_NodeType::sendNotification");
 static_assert(__builtin_offsetof(RED4ext::quest::JournalNodeDefinition, type) == 0x48, "RED4ext::quest::JournalNodeDefinition::type");
+static_assert(__builtin_offsetof(RED4ext::quest::JournalNodeDefinition, type) == 0x48, "RED4ext::quest::JournalNodeDefinition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::NodeDefinition, id) == 0x40, "RED4ext::quest::NodeDefinition::id");
 static_assert(__builtin_offsetof(RED4ext::quest::NodeLoadingCondition, objectRef) == 0x38, "RED4ext::quest::NodeLoadingCondition::objectRef");
 static_assert(__builtin_offsetof(RED4ext::quest::NodeLoadingCondition, inverted) == 0x40, "RED4ext::quest::NodeLoadingCondition::inverted");
@@ -1186,7 +1196,13 @@ static_assert(__builtin_offsetof(RED4ext::quest::NodeLoadingCondition, objectRef
 static_assert(__builtin_offsetof(RED4ext::quest::NodeLoadingCondition, inverted) == 0x40, "RED4ext::quest::NodeLoadingCondition::inverted");
 static_assert(__builtin_offsetof(RED4ext::quest::ObjectCondition, type) == 0x30, "RED4ext::quest::ObjectCondition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::PauseConditionNodeDefinition, condition) == 0x48, "RED4ext::quest::PauseConditionNodeDefinition::condition");
+static_assert(__builtin_offsetof(RED4ext::quest::PauseConditionNodeDefinition, condition) == 0x48, "RED4ext::quest::PauseConditionNodeDefinition::condition");
 static_assert(sizeof(RED4ext::quest::PhaseInstance) == 272, "sizeof(RED4ext::quest::PhaseInstance)");
+static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, phaseGraph) == 0x60, "RED4ext::quest::PhaseNodeDefinition::phaseGraph");
+static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, phaseInstancePrefabs) == 0x70, "RED4ext::quest::PhaseNodeDefinition::phaseInstancePrefabs");
+static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, unfreezingTriggerNodeRef) == 0x80, "RED4ext::quest::PhaseNodeDefinition::unfreezingTriggerNodeRef");
+static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, phaseResource) == 0x88, "RED4ext::quest::PhaseNodeDefinition::phaseResource");
+static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, saveLock) == 0x90, "RED4ext::quest::PhaseNodeDefinition::saveLock");
 static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, phaseGraph) == 0x60, "RED4ext::quest::PhaseNodeDefinition::phaseGraph");
 static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, phaseInstancePrefabs) == 0x70, "RED4ext::quest::PhaseNodeDefinition::phaseInstancePrefabs");
 static_assert(__builtin_offsetof(RED4ext::quest::PhaseNodeDefinition, unfreezingTriggerNodeRef) == 0x80, "RED4ext::quest::PhaseNodeDefinition::unfreezingTriggerNodeRef");
@@ -1209,6 +1225,7 @@ static_assert(__builtin_offsetof(RED4ext::quest::ShowWorldNode_NodeType, show) =
 static_assert(__builtin_offsetof(RED4ext::quest::ShowWorldNode_NodeType, componentName) == 0x48, "RED4ext::quest::ShowWorldNode_NodeType::componentName");
 static_assert(__builtin_offsetof(RED4ext::quest::SocketDefinition, type) == 0x58, "RED4ext::quest::SocketDefinition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::SpawnManagerNodeActionEntry, type) == 0x0, "RED4ext::quest::SpawnManagerNodeActionEntry::type");
+static_assert(__builtin_offsetof(RED4ext::quest::SpawnManagerNodeDefinition, actions) == 0x48, "RED4ext::quest::SpawnManagerNodeDefinition::actions");
 static_assert(__builtin_offsetof(RED4ext::quest::SpawnManagerNodeDefinition, actions) == 0x48, "RED4ext::quest::SpawnManagerNodeDefinition::actions");
 static_assert(__builtin_offsetof(RED4ext::quest::SpawnManagerNodeType, action) == 0x30, "RED4ext::quest::SpawnManagerNodeType::action");
 static_assert(__builtin_offsetof(RED4ext::quest::SpawnSet_NodeType, reference) == 0x38, "RED4ext::quest::SpawnSet_NodeType::reference");
@@ -1238,6 +1255,7 @@ static_assert(__builtin_offsetof(RED4ext::quest::VarComparison_ConditionType, va
 static_assert(__builtin_offsetof(RED4ext::quest::VarComparison_ConditionType, comparisonType) == 0x5C, "RED4ext::quest::VarComparison_ConditionType::comparisonType");
 static_assert(__builtin_offsetof(RED4ext::quest::VariantState, name) == 0x0, "RED4ext::quest::VariantState::name");
 static_assert(__builtin_offsetof(RED4ext::quest::VariantState, show) == 0x8, "RED4ext::quest::VariantState::show");
+static_assert(__builtin_offsetof(RED4ext::quest::WorldDataManagerNodeDefinition, type) == 0x48, "RED4ext::quest::WorldDataManagerNodeDefinition::type");
 static_assert(__builtin_offsetof(RED4ext::quest::WorldDataManagerNodeDefinition, type) == 0x48, "RED4ext::quest::WorldDataManagerNodeDefinition::type");
 static_assert(__builtin_offsetof(RED4ext::work::TransitionAnim, idleA) == 0x0, "RED4ext::work::TransitionAnim::idleA");
 static_assert(__builtin_offsetof(RED4ext::work::TransitionAnim, idleB) == 0x8, "RED4ext::work::TransitionAnim::idleB");
@@ -1324,4 +1342,4 @@ static_assert(__builtin_offsetof(RED4ext::localization::PersistenceOnScreenEntry
 static_assert(__builtin_offsetof(RED4ext::localization::PersistenceOnScreenEntry, secondaryKey) == 0x8, "RED4ext::localization::PersistenceOnScreenEntry::secondaryKey");
 static_assert(__builtin_offsetof(RED4ext::localization::PersistenceOnScreenEntry, femaleVariant) == 0x28, "RED4ext::localization::PersistenceOnScreenEntry::femaleVariant");
 static_assert(__builtin_offsetof(RED4ext::localization::PersistenceOnScreenEntry, maleVariant) == 0x48, "RED4ext::localization::PersistenceOnScreenEntry::maleVariant");
-static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, meshHandle) == 0x1F8, "RED4ext::ent::SkinnedMeshComponent::meshHandle: Windows 0x73FCDC reads [this+0x200], Mac twin 0xC7D688 reads [this+0x1F8]");
+static_assert(__builtin_offsetof(RED4ext::ent::SkinnedMeshComponent, meshHandle) == 0x1F8, "RED4ext::ent::SkinnedMeshComponent::meshHandle: Windows 0x1B3B5C reads [this+0x200], Mac twin 0xC7D688 reads [this+0x1F8]");
