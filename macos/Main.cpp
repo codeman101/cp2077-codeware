@@ -25,14 +25,14 @@ Core::UniquePtr<App::Application> g_app;
 int g_moduleAnchor = 0;
 }
 
-RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason,
-                                        const RED4ext::Sdk* aSdk)
+RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::v1::PluginHandle aHandle, RED4ext::v1::EMainReason aReason,
+                                        const RED4ext::v1::Sdk* aSdk)
 {
     try
     {
         switch (aReason)
         {
-        case RED4ext::EMainReason::Load:
+        case RED4ext::v1::EMainReason::Load:
         {
             if (g_initialized)
             {
@@ -62,7 +62,7 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::
             // installed by App::ScriptingService (it is registered in App::Application and bootstrapped above).
             break;
         }
-        case RED4ext::EMainReason::Unload:
+        case RED4ext::v1::EMainReason::Unload:
         {
             g_initialized = false;
             if (g_app)
@@ -92,16 +92,16 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::
     }
 }
 
-RED4EXT_C_EXPORT void RED4EXT_CALL Query(RED4ext::PluginInfo* aInfo)
+RED4EXT_C_EXPORT void RED4EXT_CALL Query(RED4ext::v1::PluginInfo* aInfo)
 {
     aInfo->name = App::Project::NameW;
     aInfo->author = App::Project::AuthorW;
-    aInfo->version = RED4EXT_SEMVER(App::Project::Version.major, App::Project::Version.minor, App::Project::Version.patch);
-    aInfo->runtime = RED4EXT_RUNTIME_INDEPENDENT;
-    aInfo->sdk = RED4EXT_SDK_LATEST;
+    aInfo->version = RED4EXT_V1_SEMVER(App::Project::Version.major, App::Project::Version.minor, App::Project::Version.patch);
+    aInfo->runtime = RED4EXT_V1_RUNTIME_VERSION_INDEPENDENT;
+    aInfo->sdk = RED4EXT_V1_SDK_VERSION_1_0_0_COMPAT_0_5_0;
 }
 
 RED4EXT_C_EXPORT uint32_t RED4EXT_CALL Supports()
 {
-    return RED4EXT_API_VERSION_LATEST;
+    return RED4EXT_API_VERSION_1_COMPAT_0;
 }

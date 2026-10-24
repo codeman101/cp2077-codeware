@@ -33,7 +33,7 @@
 #endif
 
 #if defined(__APPLE__)
-App::Application::Application(void* aModule, RED4ext::PluginHandle aPlugin, const RED4ext::Sdk* aSdk)
+App::Application::Application(void* aModule, RED4ext::v1::PluginHandle aPlugin, const RED4ext::v1::Sdk* aSdk)
 {
     // No Core::LocaleProvider: it sets the C locale for the whole process, and the game on macOS does not need it
     // (UTF8StrLower and the other string natives pass their self-tests without it).

@@ -110,8 +110,8 @@ void ReflectionTests()
     {
         Red::DynArray<Red::CProperty*> props;
         cls->GetProperties(props);
-        MAC_DIAG( "[selftest] R19 GetProperties(StackTraceEntry) -> %u properties\n", props.size);
-        Mac::R19Check(props.size == 3, "CClass::GetProperties lists the three properties of a Codeware struct");
+        MAC_DIAG( "[selftest] R19 GetProperties(StackTraceEntry) -> %u properties\n", props.Size());
+        Mac::R19Check(props.Size() == 3, "CClass::GetProperties lists the three properties of a Codeware struct");
 
         App::StackTraceEntry a(Red::CName("ClassA"), Red::CName("FuncA"), {});
         App::StackTraceEntry b(Red::CName("ClassA"), Red::CName("FuncA"), {});
@@ -134,10 +134,10 @@ void ReflectionTests()
         uint32_t chain = 0;
         for (auto* c = cls; c; c = c->parent)
         {
-            chain += c->props.size;
+            chain += c->props.Size();
         }
-        MAC_DIAG( "[selftest] R19 GetProperties(gameObject) -> %u properties, own chain sum %u\n", props.size, chain);
-        Mac::R19Check(props.size == chain && chain > 0, "CClass::GetProperties covers the class chain of a game class");
+        MAC_DIAG( "[selftest] R19 GetProperties(gameObject) -> %u properties, own chain sum %u\n", props.Size(), chain);
+        Mac::R19Check(props.Size() == chain && chain > 0, "CClass::GetProperties covers the class chain of a game class");
     }
 
     // Clone of a scripted object: a new object of the same class with the same field value.

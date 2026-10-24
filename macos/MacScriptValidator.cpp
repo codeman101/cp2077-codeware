@@ -328,8 +328,9 @@ LayoutResult CheckLayout(Red::ScriptBundle* aBundle)
     uint64_t entries = 0;
     uint32_t capacity = 0;
     uint32_t size = 0;
-    if (!SafeRead(&aBundle->classes.entries, entries) || !SafeRead(&aBundle->classes.capacity, capacity) ||
-        !SafeRead(&aBundle->classes.size, size))
+    // DynArray's members are private since SDK 1.0 (RED4ext.SDK #180): read the three words by their ABI offsets (00, 08, 0C).
+    const auto* classesRaw = reinterpret_cast<const uint8_t*>(&aBundle->classes);
+    if (!SafeRead(classesRaw + 0x00, entries) || !SafeRead(classesRaw + 0x08, capacity) || !SafeRead(classesRaw + 0x0C, size))
     {
         return fail("classes unreadable (+0xD8)");
     }
@@ -496,9 +497,9 @@ void PreValidate(Red::ScriptBundle* aBundle)
 
     auto* serializableDef = FindClassDef(aBundle, kISerializable);
 
-    for (uint32_t i = 0; i < aBundle->classes.size; ++i)
+    for (uint32_t i = 0; i < aBundle->classes.Size(); ++i)
     {
-        auto* classDef = aBundle->classes.entries[i];
+        auto* classDef = aBundle->classes[i];
         if (!classDef || !classDef->flags.isNative)
         {
             continue;

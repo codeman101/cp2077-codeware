@@ -307,8 +307,8 @@ void Stage3_Walker(RED4ext::GameInstance* aGame)
                  static_cast<unsigned long>(kWalkerRva), static_cast<void*>(aGame));
     std::fflush(stderr);
     walker(aGame, &locks, false);
-    MAC_DIAG( "[selftest] R16b save-lock collector returned: %u lock(s)\n", locks.size);
-    for (uint32_t i = 0; i < locks.size && i < 8; ++i)
+    MAC_DIAG( "[selftest] R16b save-lock collector returned: %u lock(s)\n", locks.Size());
+    for (uint32_t i = 0; i < locks.Size() && i < 8; ++i)
     {
         MAC_DIAG( "[selftest] R16b   lock %u: reason=%d description=\"%s\"\n", i, static_cast<int>(locks[i].reason),
                      locks[i].description.c_str());
@@ -344,9 +344,9 @@ void Mac::R16bSelfTest()
     }
 
     std::vector<System> systems;
-    for (uint32_t i = 0; i < game->systemInstances.size; ++i)
+    for (uint32_t i = 0; i < game->systemInstances.Size(); ++i)
     {
-        auto* object = game->systemInstances.entries[i].instance;
+        auto* object = game->systemInstances[i].instance;
         if (!object)
         {
             continue;

@@ -117,7 +117,7 @@ void Mac::R17AuditPropertyTypes(const char* aWhen)
         {
             continue;
         }
-        for (uint32_t i = 0; i < cls->props.size; ++i)
+        for (uint32_t i = 0; i < cls->props.Size(); ++i)
         {
             auto* prop = cls->props[i];
             ++props;
@@ -134,7 +134,7 @@ void Mac::R17AuditPropertyTypes(const char* aWhen)
         }
     }
     MAC_DIAG( "[diag] R17 audit %s: %u classes, %u properties, %u without a type\n", aWhen,
-                 static_cast<unsigned>(classes.size), props, withoutType);
+                 static_cast<unsigned>(classes.Size()), props, withoutType);
     constexpr auto districtName = Red::GetTypeName<Red::gamedataDistrict>();
     MAC_DIAG( "[diag] R17 audit %s: enum gamedataDistrict=%p type array:gamedataDistrict=%p resolved name=%s Red::GetType=%p\n",
                  aWhen, static_cast<void*>(rtti->GetEnum(RED4ext::CName("gamedataDistrict"))),

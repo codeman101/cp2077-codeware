@@ -83,11 +83,11 @@ inline bool CalledFromExit()
 } // namespace Detail
 
 // Call from Load. aName is "AXL", "CW" or "TXL". Registers the Shutdown game state (the preferred signal that the process is exiting).
-inline void MarkPluginLoaded(RED4ext::PluginHandle aHandle, const RED4ext::Sdk* aSdk, const char* aName)
+inline void MarkPluginLoaded(RED4ext::v1::PluginHandle aHandle, const RED4ext::v1::Sdk* aSdk, const char* aName)
 {
     setenv(Detail::StateKey(aName).c_str(), "loaded", 1);
     Detail::PluginTag() = aName;
-    static RED4ext::GameState state{&Detail::OnShutdownEnter, &Detail::OnShutdownUpdate, &Detail::OnShutdownExit};
+    static RED4ext::v1::GameState state{&Detail::OnShutdownEnter, &Detail::OnShutdownUpdate, &Detail::OnShutdownExit};
     const bool added = aSdk && aSdk->gameStates && aSdk->gameStates->Add &&
                        aSdk->gameStates->Add(aHandle, RED4ext::EGameStateType::Shutdown, &state);
     // A quiet session (CODEWARE_MAC_DIAG not 1) prints nothing for the normal case; the fallback notice and the exit lines always print.

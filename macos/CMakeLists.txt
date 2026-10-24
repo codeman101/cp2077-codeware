@@ -170,7 +170,6 @@ set_target_properties(Codeware PROPERTIES
 )
 
 target_include_directories(Codeware PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/inc"
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${SDK_OVERLAY}"
     "${CMAKE_CURRENT_BINARY_DIR}/generated"

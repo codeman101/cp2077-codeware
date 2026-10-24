@@ -47,7 +47,7 @@ void DumpReflection(const char* aPath)
             continue;
         std::fprintf(out, "C\t%s\t%s\t%u\t%u\t%u\n", cls->name.ToString(), cls->parent ? cls->parent->name.ToString() : "",
                      cls->size, cls->holderSize, cls->alignment);
-        for (uint32_t i = 0; i < cls->props.size; ++i)
+        for (uint32_t i = 0; i < cls->props.Size(); ++i)
         {
             auto* prop = cls->props[i];
             if (!prop)
@@ -58,7 +58,7 @@ void DumpReflection(const char* aPath)
         }
     }
     std::fclose(out);
-    MAC_DIAG( "[selftest] R20 reflection dump: %u classes, %u properties -> %s\n", static_cast<unsigned>(classes.size),
+    MAC_DIAG( "[selftest] R20 reflection dump: %u classes, %u properties -> %s\n", static_cast<unsigned>(classes.Size()),
                  propCount, aPath);
 }
 }

@@ -26,13 +26,8 @@ void MacPublishGlobal(::RED4ext::CRTTISystem* aRtti, const char* aName, ::RED4ex
 namespace Detail
 {
 // The instance arguments of the type virtuals: the Mac SDK spells them ScriptInstance (void*), the Windows SDK pin const void* / void*.
-#if defined(__APPLE__)
-using InstancePtr = ScriptInstance;
-using ConstInstancePtr = const ScriptInstance;
-#else
 using InstancePtr = void*;
 using ConstInstancePtr = const void*;
-#endif
 }
 
 template<Scope>

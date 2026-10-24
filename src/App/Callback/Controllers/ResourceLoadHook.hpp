@@ -129,7 +129,7 @@ protected:
         const bool dispatched = CallbackSystem::Get()->DispatchNativeEvent<ResourceEvent>(EventName, resource);
 #if defined(__APPLE__)
         MAC_DIAG("[diag] R18 soundbanks: %u registered banks copied, Resource/Load dispatched=%d\n",
-                 static_cast<unsigned>(resource->soundBanks.size), dispatched ? 1 : 0);
+                 static_cast<unsigned>(resource->soundBanks.Size()), dispatched ? 1 : 0);
 #endif
         if (dispatched)
         {

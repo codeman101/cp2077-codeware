@@ -12,7 +12,7 @@
 #include "MacHookChain.hpp"
 #include "MacTrap.hpp"
 
-#include <RED4ext/Api/Sdk.hpp>
+#include <RED4ext/Api/v1/Sdk.hpp>
 
 namespace Red
 {
@@ -24,7 +24,7 @@ namespace Support
 class MacHookingDriver : public Core::HookingDriver
 {
 public:
-    MacHookingDriver(RED4ext::PluginHandle aPlugin, const RED4ext::Sdk* aSdk) noexcept
+    MacHookingDriver(RED4ext::v1::PluginHandle aPlugin, const RED4ext::v1::Sdk* aSdk) noexcept
         : m_plugin(aPlugin)
         , m_sdk(aSdk)
     {
@@ -85,7 +85,7 @@ private:
         return ok;
     }
 
-    RED4ext::PluginHandle m_plugin;
-    const RED4ext::Sdk* m_sdk;
+    RED4ext::v1::PluginHandle m_plugin;
+    const RED4ext::v1::Sdk* m_sdk;
 };
 }

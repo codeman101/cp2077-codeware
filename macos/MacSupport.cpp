@@ -435,7 +435,7 @@ void LogOneClass(const char* aName, const char* aAlt)
     if (cls)
     {
         MAC_DIAG( "[diag] %s found=1 abstract=%u funcs=%u staticFuncs=%u via=%s\n", aName,
-                     static_cast<unsigned>(cls->flags.isAbstract), cls->funcs.size, cls->staticFuncs.size, used);
+                     static_cast<unsigned>(cls->flags.isAbstract), cls->funcs.Size(), cls->staticFuncs.Size(), used);
         return;
     }
 
@@ -515,7 +515,7 @@ void LogClasses()
     if (grid)
     {
         const RED4ext::CName want("orientation");
-        for (uint32_t i = 0; i < grid->props.size; ++i)
+        for (uint32_t i = 0; i < grid->props.Size(); ++i)
         {
             auto* prop = grid->props[i];
             if (prop && prop->name == want)
@@ -572,7 +572,7 @@ void LogSystems()
     if (gameType)
     {
         const RED4ext::CName want("GetCallbackSystem");
-        for (uint32_t i = 0; i < gameType->staticFuncs.size; ++i)
+        for (uint32_t i = 0; i < gameType->staticFuncs.Size(); ++i)
         {
             auto* fn = gameType->staticFuncs[i];
             if (fn && fn->shortName == want)
@@ -784,7 +784,7 @@ void CallGetGameInstanceNative(RED4ext::CGlobalFunction* aFunc, RED4ext::ScriptG
 {
     auto* retType = (aFunc->returnType && aFunc->returnType->type) ? aFunc->returnType->type
                                                                     : Red::ResolveType<RED4ext::ScriptGameInstance>();
-    if (!retType || retType->GetSize() != sizeof(RED4ext::ScriptGameInstance) || aFunc->params.size != 0)
+    if (!retType || retType->GetSize() != sizeof(RED4ext::ScriptGameInstance) || aFunc->params.Size() != 0)
     {
         aHow = "no-rettype";
         return;

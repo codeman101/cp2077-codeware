@@ -164,7 +164,7 @@ void App::ScriptableServiceContainer::MacPersistenceSelfTest()
         Red::ObjectSerializer::ReadFromFile(state, testPath);
 
         const bool read = static_cast<bool>(state);
-        const size_t count = read ? state->services.size : 0;
+        const size_t count = read ? state->services.Size() : 0;
         MAC_DIAG( "[selftest] R19 persistence: read back state=%d services=%zu live=%zu\n", read ? 1 : 0, count,
                      m_services.size());
         Mac::R19Check(read, "ReadFromFile gave the state object back");
@@ -259,7 +259,7 @@ void App::ScriptableServiceContainer::LoadState()
                 if (service)
                     ++restored;
             }
-            MAC_DIAG("[cw] R19 LoadState: read %zu services from the file (%zu not null)\n", static_cast<size_t>(state->services.size),
+            MAC_DIAG("[cw] R19 LoadState: read %zu services from the file (%zu not null)\n", static_cast<size_t>(state->services.Size()),
                      restored);
         }
 #endif

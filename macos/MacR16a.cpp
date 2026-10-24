@@ -61,11 +61,11 @@ void CheckClass(Tally& aTally, const char* aName)
         return;
     }
 
-    const uint32_t ownCount = cls->props.size;
+    const uint32_t ownCount = cls->props.Size();
     int found = 0;
     for (uint32_t i = 0; i < ownCount && i < 3; ++i)
     {
-        auto* prop = cls->props.entries[i];
+        auto* prop = cls->props[i];
         if (!prop)
         {
             continue;
@@ -79,9 +79,9 @@ void CheckClass(Tally& aTally, const char* aName)
     int viaParent = -1;
     for (auto* parent = cls->parent; parent; parent = parent->parent)
     {
-        if (parent->props.size > 0 && parent->props.entries[0])
+        if (parent->props.Size() > 0 && parent->props[0])
         {
-            auto* want = parent->props.entries[0];
+            auto* want = parent->props[0];
             auto* got = cls->GetProperty(want->name);
             aTally.Check(got == want, "GetProperty(name of a parent property) walks the parent chain");
             viaParent = (got == want) ? 1 : 0;

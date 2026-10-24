@@ -64,7 +64,7 @@ void DumpStruct(DumpState& aState, int aDepth, RED4ext::CClass* aClass, void* aB
 {
     for (auto* cls = aClass; cls; cls = cls->parent)
     {
-        for (uint32_t i = 0; i < cls->props.size; ++i)
+        for (uint32_t i = 0; i < cls->props.Size(); ++i)
         {
             auto* prop = cls->props[i];
             if (!prop || !prop->type)

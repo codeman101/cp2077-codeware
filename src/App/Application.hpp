@@ -16,7 +16,7 @@ class Application
 public:
 #if defined(__APPLE__)
     // aModule is an address inside this dylib (Core::ModuleImage finds the plugin path from it with dladdr).
-    Application(void* aModule, RED4ext::PluginHandle aPlugin, const RED4ext::Sdk* aSdk);
+    Application(void* aModule, RED4ext::v1::PluginHandle aPlugin, const RED4ext::v1::Sdk* aSdk);
 #else
     explicit Application(HMODULE aHandle, const RED4ext::v1::Sdk* aSdk = nullptr);
 #endif

@@ -24,7 +24,7 @@ class MacPlatformProvider
     , public Core::LoggingDriver
 {
 public:
-    MacPlatformProvider(RED4ext::PluginHandle aPlugin, const RED4ext::Sdk* aSdk) noexcept
+    MacPlatformProvider(RED4ext::v1::PluginHandle aPlugin, const RED4ext::v1::Sdk* aSdk) noexcept
         : m_driver(aPlugin, aSdk)
     {
     }
