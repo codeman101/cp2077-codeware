@@ -9,7 +9,7 @@
 // ask for billions of list entries and the game stops in its DynArray grow trap (+0x28878, the R79 report). On the loads that did not
 // crash the leftovers were zeros, so the node got one entry in its first list and two empty lists (R80).
 //
-// The hook runs before the decode and zeroes up to 256 bytes after the decoded size, so such reads always get the zeros a fresh buffer
+// The hook runs before the decode and zeroes up to 4 KB after the decoded size, so such reads always get the zeros a fresh buffer
 // gives. It touches only scratch buffers (the capacity equals the scratch size), only KARK data (the header holds the decoded size), and
 // only bytes inside [decoded size, capacity), which nothing reads as package data.
 
@@ -48,7 +48,8 @@ namespace
 {
 constexpr uint32_t KarkMagic = 0x4b52414b;     // "KARK": the archive's Kraken container, the decoded size follows the magic
 constexpr uintptr_t ScratchSizeRva = 0x99dc8a4; // u32, read by +0x10eb1b4 and by the worker that allocates the buffers
-constexpr uint32_t TailBytes = 256;
+// One straddling element plus the counts after it reach into the tail; a zero count ends any list, so 4 KB is ample.
+constexpr uint32_t TailBytes = 4096;
 
 std::atomic<uint64_t> s_zeroed{0};
 
