@@ -11,6 +11,7 @@
 #include "App/Callback/Events/ResourceEvent.hpp"
 #include "App/Callback/MacHookStats.hpp"
 #include "Red/Serialization.hpp"
+#include "MacR13.hpp"
 
 #include <cstdio>
 
@@ -40,6 +41,11 @@ inline void DispatchMacResourceJob(Red::ResourceSerializer** aCaptures, Red::CNa
             if (const auto& resource = Red::Cast<Red::CResource>(serializable))
             {
                 const uint64_t pathHash = resource->path.hash;
+                // DIAG R80: the LizziesBDs sector whose old-format instanced mesh node over-reads (R79 crash).
+                if (aIsLoad && pathHash == 0x550364e813d7a12aull)
+                {
+                    Mac::LogSectorNodes(resource.instance, pathHash);
+                }
                 MacHookStats::NoteResource(aStats, pathHash);
                 MacHookStats::NoteAudioTarget(pathHash, aIsLoad);
 
