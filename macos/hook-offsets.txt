@@ -22,6 +22,7 @@
 0x11a8f30  # ScriptValidator_ValidateProperty
 0x1209038  # ResourceSerializer_MacLoadJob
 0x12092e0  # ResourceSerializer_MacPostLoadJob
+0x1219c30  # ResourceSerializer_MacJobDecode (R81: zero the scratch buffer tail after the decoded package)
 0x1c2b6dc  # Localization_LoadOnScreens
 0x4d7efb8  # CBaseEngine_InitEngine
 0x4d7fba8  # CBaseEngine_LoadGatheredResources
