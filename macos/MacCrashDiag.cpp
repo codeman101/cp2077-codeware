@@ -351,9 +351,12 @@ void LogSectorNodesImpl(uintptr_t aSector, uint64_t aPathHash)
     {
         setupSum = setupSum * 31 + Load<uint64_t>(setupData + off, ok);
     }
-    std::snprintf(line, sizeof(line), "[diag] R80 sector 0x%016llx: setups %p size %u version 0x%x sum %016llx, nodes %u%s\n",
+    // The serializer's scratch buffer size, which is also the size below which a compressed file is decoded in the load job
+    // (into the scratch buffer) instead of by the IO (into a buffer of its own size): game +0x99dc8a4 (reader +0x10eb1b4).
+    const uint32_t scratch = Load<uint32_t>(game + 0x99dc8a4, ok);
+    std::snprintf(line, sizeof(line), "[diag] R80 sector 0x%016llx: setups %p size %u version 0x%x sum %016llx, nodes %u, scratch %u%s\n",
                   static_cast<unsigned long long>(aPathHash), reinterpret_cast<void*>(setupData), setupSize, setupVersion,
-                  static_cast<unsigned long long>(setupSum), nodeCount, ok ? "" : " (some unreadable)");
+                  static_cast<unsigned long long>(setupSum), nodeCount, scratch, ok ? "" : " (some unreadable)");
     Emit(line);
     for (uint32_t i = 0; i < nodeCount && i < 256; ++i)
     {
