@@ -331,6 +331,70 @@ void DumpDynArrayGrowTrap(const arm_thread_state64_t& aState)
     }
 }
 
+// DIAG R80. One loaded streaming sector, logged after deserialization (MacResourceJob, the load job hook): the sector's node setup
+// buffer and, for each worldInstancedMeshNode (vtable +0x78e5130), its three lists (+0x60 / +0x70 / +0x80: pointer, capacity,
+// size), the version byte (+0x90) and the first bytes of the lists. The R79 crash read past the end of an old-format (version 1)
+// node of the LizziesBDs sector 0x550364e813d7a12a into a scratch buffer; this shows what that node reads on loads that do not crash.
+// Node buffer at sector +0x40: setup DataBuffer (data +0x00, size +0x08), version +0x28, node handles +0x30 (entries, capacity, size).
+void LogSectorNodesImpl(uintptr_t aSector, uint64_t aPathHash)
+{
+    const uintptr_t game = GameBase();
+    char line[512];
+    bool ok = true;
+    const uintptr_t setupData = Load<uintptr_t>(aSector + 0x40, ok);
+    const uint32_t setupSize = Load<uint32_t>(aSector + 0x48, ok);
+    const uint32_t setupVersion = Load<uint32_t>(aSector + 0x40 + 0x28, ok);
+    const uintptr_t nodes = Load<uintptr_t>(aSector + 0x40 + 0x30, ok);
+    const uint32_t nodeCount = Load<uint32_t>(aSector + 0x40 + 0x3c, ok);
+    uint64_t setupSum = 0;
+    for (uint32_t off = 0; off + 8 <= setupSize && off < 0x10000; off += 8)
+    {
+        setupSum = setupSum * 31 + Load<uint64_t>(setupData + off, ok);
+    }
+    std::snprintf(line, sizeof(line), "[diag] R80 sector 0x%016llx: setups %p size %u version 0x%x sum %016llx, nodes %u%s\n",
+                  static_cast<unsigned long long>(aPathHash), reinterpret_cast<void*>(setupData), setupSize, setupVersion,
+                  static_cast<unsigned long long>(setupSum), nodeCount, ok ? "" : " (some unreadable)");
+    Emit(line);
+    for (uint32_t i = 0; i < nodeCount && i < 256; ++i)
+    {
+        bool nodeOk = true;
+        const uintptr_t node = Load<uintptr_t>(nodes + 0x10 * i, nodeOk);
+        const uintptr_t vt = Load<uintptr_t>(node, nodeOk);
+        if (!nodeOk || vt != game + 0x78e5130)
+        {
+            continue;
+        }
+        struct ListFields
+        {
+            uint64_t ptr;
+            uint32_t capacity;
+            uint32_t size;
+        } lists[3]{};
+        uint8_t head[3][16]{};
+        for (int k = 0; k < 3; ++k)
+        {
+            SafeRead(node + 0x60 + 0x10 * k, &lists[k], sizeof(ListFields));
+            if (lists[k].ptr && lists[k].size)
+            {
+                SafeRead(lists[k].ptr, head[k], sizeof(head[k]));
+            }
+        }
+        const uint8_t version = Load<uint8_t>(node + 0x90, nodeOk);
+        int len = std::snprintf(line, sizeof(line), "[diag] R80   node %u %p v%u", i, reinterpret_cast<void*>(node), version);
+        for (int k = 0; k < 3; ++k)
+        {
+            len += std::snprintf(line + len, sizeof(line) - len, " | list%x size %u cap %u:", 0x60 + 0x10 * k, lists[k].size,
+                                 lists[k].capacity);
+            for (int b = 0; b < 16 && lists[k].size; ++b)
+            {
+                len += std::snprintf(line + len, sizeof(line) - len, " %02x", head[k][b]);
+            }
+        }
+        std::snprintf(line + len, sizeof(line) - len, "\n");
+        Emit(line);
+    }
+}
+
 void Handler(int aSignal, siginfo_t* aInfo, void* aContext)
 {
     // One report per process. A second fault inside the handler goes straight to the default action.
@@ -428,6 +492,11 @@ void Handler(int aSignal, siginfo_t* aInfo, void* aContext)
     Emit("[crash] exiting now (_exit), no crash report\n");
     _exit(128 + aSignal);
 }
+}
+
+void Mac::LogSectorNodes(void* aSector, unsigned long long aPathHash)
+{
+    LogSectorNodesImpl(reinterpret_cast<uintptr_t>(aSector), aPathHash);
 }
 
 void Mac::InstallCrashDiag()

@@ -22,6 +22,10 @@ void R14StartServices();
 // short-lived thread call it again.
 void InstallCrashDiag();
 
+// MacCrashDiag.cpp. DIAG R80. Logs the node setups and the worldInstancedMeshNode lists of one loaded streaming sector (read through
+// the kernel, so a bad pointer cannot fault). Called from the load job hook (MacResourceJob.hpp) for the sectors it watches.
+void LogSectorNodes(void* aSector, unsigned long long aPathHash);
+
 // MacGameInstanceHook.cpp. R14. Hooks the GetGameInstance native (0x1F42944) at plugin load. After the original
 // runs, an empty result is rebuilt with the live game instance when one exists. Needs the resolver and the driver.
 bool InstallGetGameInstanceHook();
