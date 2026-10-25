@@ -129,6 +129,8 @@ constexpr uint32_t ResourceSerializer_MacPostLoadJob = 0xC0DE0002;
 // R14. Mac-only id. 0x1F44968 is the game's own ScriptGameInstance builder, void(ScriptGameInstance*, GameInstance*).
 // The GetGameInstance native (0x1F42944, SDK hash GetScriptGameInstance) calls it with the instance from the frame.
 constexpr uint32_t MacScriptGameInstanceCtor = 0xC0DE0003;
+// R81. Mac-only id. 0x1219C30 is the decode the deserialize job runs into the serializer's scratch buffer (macos/MacScratchTail.cpp).
+constexpr uint32_t ResourceSerializer_MacJobDecode = 0xC0DE0012;
 #endif
 
 constexpr uint32_t RuntimeEntityRegistry_RegisterEntity = 2840271332; // world::RuntimeEntityRegistry::RegisterEntity

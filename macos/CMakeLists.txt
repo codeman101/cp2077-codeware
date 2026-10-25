@@ -69,6 +69,7 @@ set(CODEWARE_SOURCES
     MacR16b.cpp
     MacR17.cpp
     MacCrashDiag.cpp
+    MacScratchTail.cpp
     ArchiveXLScripts.cpp
     Clipboard.mm
     KeyTranslate.mm

@@ -26,6 +26,11 @@ void InstallCrashDiag();
 // the kernel, so a bad pointer cannot fault). Called from the load job hook (MacResourceJob.hpp) for the sectors it watches.
 void LogSectorNodes(void* aSector, unsigned long long aPathHash);
 
+// MacScratchTail.cpp. R81. Hooks the deserialize job's decode (0x1219C30) so that a package decoded into the serializer's scratch
+// buffer is followed by zeros instead of an earlier package's bytes (the R79 crash). ScratchTailsZeroed counts the decodes it padded.
+bool InstallScratchTailHook();
+unsigned long long ScratchTailsZeroed();
+
 // MacGameInstanceHook.cpp. R14. Hooks the GetGameInstance native (0x1F42944) at plugin load. After the original
 // runs, an empty result is rebuilt with the live game instance when one exists. Needs the resolver and the driver.
 bool InstallGetGameInstanceHook();

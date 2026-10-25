@@ -2,6 +2,7 @@
 #if defined(__APPLE__)
 #include "MacDiag.hpp"
 #include "MacEngine.hpp"
+#include "MacR13.hpp"
 #endif
 #include "App/Callback/Controllers/ComponentToggleHook.hpp"
 #include "App/Callback/Controllers/EntityAssembleHook.hpp"
@@ -406,6 +407,7 @@ bool App::InstallMacCallbackHooks()
     install("VehicleLightControlHook", &VehicleLightControlHook::InstallMacHook);
     install("PlayerSpawnedHook", &PlayerSpawnedHook::InstallMacHook);
     install("RawInputHook", &RawInputHook::InstallMacHook);
+    install("ScratchTailHook", &Mac::InstallScratchTailHook); // R81, macos/MacScratchTail.cpp
     return ok;
 }
 #endif

@@ -22,6 +22,7 @@ const std::unordered_map<uint32_t, uintptr_t>& MacRows()
         {3491172781, 0x1B17694}, // NodeRef_Create. Mac ABI uint64_t(const char*, uint32_t, bool).
         {1559305924, 0x16A5BA8}, // GetScriptGameInstance. The GetGameInstance script native (void(ctx, frame, out, type)).
         {0xC0DE0003, 0x16AA1F0}, // MacScriptGameInstanceCtor. void(ScriptGameInstance* out, GameInstance*). Mac-only id.
+        {0xC0DE0012, 0x1219C30}, // ResourceSerializer_MacJobDecode (R81). bool(name, source {data, size}, destination, capacity). Function start (the callers' 4-byte thunk 0x1219C2C jumps here); called by the deserialize job 0x1207ED4 and six buffer loaders.
         // R18 B0. Engine timing hooks and the framework's GameInstance job. Entry and body matched against the Windows twin.
         {3273923080, 0x4D7EFB8}, // CBaseEngine_InitEngine. bool(CBaseEngine&, CGameOptions&). Windows 0x7CB080: same init-stage strings and options+0xB1.
         {3729789488, 0x4D7FBA8}, // CBaseEngine_LoadGatheredResources. bool(CBaseEngine&). Windows 0x303460: virtual slot 0xD0 (Mac 0xD8), helper call, bool.
