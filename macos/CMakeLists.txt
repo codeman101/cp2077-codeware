@@ -1,4 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
+# Portable build (default ON, macOS only): the dylib is built for macOS 15.5, the game's own minimum, and links fmt, spdlog statically
+# (macos/PortableDeps.cmake), so it needs nothing but the system libraries and runs on a Mac without Homebrew. -DCP2077_MAC_PORTABLE=OFF
+# gives the build that links Homebrew's shared libraries through @loader_path copies (fix-install-names.sh) again. The deployment target is a
+# cache default, set before project(): -DCMAKE_OSX_DEPLOYMENT_TARGET=<version> overrides it.
+option(CP2077_MAC_PORTABLE "Build for distribution: deployment target 15.5, fmt/spdlog linked statically" ON)
+if(CP2077_MAC_PORTABLE AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "15.5" CACHE STRING "Minimum macOS version the dylib is built for")
+endif()
 # The version string is upstream's (xmake.lua set_version), so the Mac build reports what upstream's own build reports.
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../xmake.lua" _upstream_xmake)
 string(REGEX MATCH "set_version\\(\"([0-9]+\\.[0-9]+\\.[0-9]+)\"" _upstream_version "${_upstream_xmake}")
@@ -53,8 +61,12 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/generated/App/Project.hpp"
 )
 
-find_package(spdlog REQUIRED)
-find_package(fmt REQUIRED)
+if(CP2077_MAC_PORTABLE)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/PortableDeps.cmake")
+else()
+    find_package(spdlog REQUIRED)
+    find_package(fmt REQUIRED)
+endif()
 
 set(CODEWARE_SOURCES
     Main.cpp
@@ -210,10 +222,13 @@ target_compile_options(Codeware PRIVATE
 
 # R14. The plugin folder carries vendored spdlog and fmt next to Codeware.dylib. Rewrite the Homebrew install
 # names to @loader_path and re-sign. The script finds the names itself, so a Homebrew version bump still works.
-add_custom_command(TARGET Codeware POST_BUILD
-    COMMAND /bin/bash "${CMAKE_CURRENT_SOURCE_DIR}/fix-install-names.sh" "$<TARGET_FILE:Codeware>"
-    VERBATIM
-)
+# Not needed in the portable build: it links nothing from Homebrew.
+if(NOT CP2077_MAC_PORTABLE)
+    add_custom_command(TARGET Codeware POST_BUILD
+        COMMAND /bin/bash "${CMAKE_CURRENT_SOURCE_DIR}/fix-install-names.sh" "$<TARGET_FILE:Codeware>"
+        VERBATIM
+    )
+endif()
 
 # R17 B3. Fail the build when a Codeware function is declared but not compiled in (the link flag above would hide it).
 add_custom_command(TARGET Codeware POST_BUILD
