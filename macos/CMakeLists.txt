@@ -16,8 +16,13 @@ if(NOT APPLE)
 endif()
 
 add_compile_definitions(RED4EXT_PLATFORM_MACOS)
-# R30: the mac-v1 branch builds for jackmaxwil's RED4ext-macos loader (natives through the RTTI register callbacks, no Frida script).
-add_compile_definitions(CP2077_MAC_V1=1)
+# R30: this branch builds for our public RED4ext-macos loader (codeman101/RED4ext-macos, mac-2.5) on game 2.5.0: the natives register through the
+# RTTI post-register callback and codeware_postLoadScripts runs when the script loader wrapper returns, both without the Frida script.
+# -DCP2077_MAC_V1=OFF gives the build for the private launcher (Frida script) again.
+option(CP2077_MAC_V1 "Build for the public RED4ext-macos loader (no Frida script)" ON)
+if(CP2077_MAC_V1)
+    add_compile_definitions(CP2077_MAC_V1=1)
+endif()
 add_compile_definitions(RED4EXT_USE_FRIDA_GADGET)
 add_compile_definitions(RED4EXT_HEADER_ONLY)
 add_compile_definitions(HOOKCHAIN_SELF=codeware)

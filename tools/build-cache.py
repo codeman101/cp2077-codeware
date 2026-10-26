@@ -44,7 +44,11 @@ _spec = importlib.util.spec_from_file_location('compose_redscripts', os.path.joi
 compose_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(compose_mod)
 
-STOCK_CACHE_SHA256 = '9a5579067ef2e3fc0f959da615ec6a0765b4bf0958abf47807791321a4dc7937'
+# The stock script cache of the game: 2.5.0 (Mac build 5814786, r6/cache/final.redscripts of Oct 22) and, kept for the older trees, 2.3.1.
+STOCK_CACHE_SHA256S = {
+    '7a5a798fe88c5e4afd64b91e265deccd091c2c5c94241003a11abbd70fb6785c': '2.5.0',
+    '9a5579067ef2e3fc0f959da615ec6a0765b4bf0958abf47807791321a4dc7937': '2.3.1',
+}
 SCC = os.path.expanduser('~/repos/cp2077-mac/tools/scc_nopopup.py')
 
 
@@ -242,7 +246,8 @@ def main():
     manifest = {
         'game_dir': game,
         'staging': staging,
-        'base_cache': {'path': base, 'sha256': base_sha, 'is_stock_cache': base_sha == STOCK_CACHE_SHA256},
+        'base_cache': {'path': base, 'sha256': base_sha, 'is_stock_cache': base_sha in STOCK_CACHE_SHA256S,
+                       'stock_cache_game_version': STOCK_CACHE_SHA256S.get(base_sha)},
         'compiler': SCC,
         'codeware_version': version,
         'inputs': sorted(inputs, key=lambda e: e['path']),
@@ -266,7 +271,7 @@ def main():
         f.write('\n')
 
     print('build-cache: %d input files, %d excluded, base cache %s%s' % (
-        len(inputs), len(excluded) + len(src_excl), base_sha[:12], '' if base_sha == STOCK_CACHE_SHA256 else ' (NOT the stock cache)'))
+        len(inputs), len(excluded) + len(src_excl), base_sha[:12], '' if base_sha in STOCK_CACHE_SHA256S else ' (NOT the stock cache)'))
     if ok:
         print('build-cache: compiled %s sha256=%s (%d bytes)' % (out_cache, manifest['result']['cache_sha256'],
                                                                  manifest['result']['cache_bytes']))

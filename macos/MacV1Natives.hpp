@@ -1,8 +1,8 @@
 #pragma once
 
-// R30 (branch mac-v1 only). jackmaxwil's RED4ext-macos loader loads the plugins from a hook on the game's main(), before the RTTI system runs its
-// register callbacks, and it has no Frida script. So the natives register the way the Windows plugins and his ports do it: through the game's own
-// CRTTISystem callbacks, in place of the Frida script's NATREG call at InitScripts entry.
+// R30 (CP2077_MAC_V1 builds only: our public loader on game 2.5.0). The public RED4ext-macos loader (codeman101/RED4ext-macos, mac-2.5) loads the
+// plugins from a hook on the game's WinMain, before the RTTI system runs its register callbacks, and it has no Frida script. So the natives register
+// the way the Windows plugins do it: through the game's own CRTTISystem callbacks, in place of the Frida script's NATREG call at InitScripts entry.
 // It is the POST-register callback (R30 J1): the game runs its own register callbacks first (its classes) and then the post-register callbacks
 // in the order they were added (its own describe steps, added by its static registrars before main(), so before ours). Our entry points
 // register AND describe (RedLib RunPending, Codeware's global publishing), so they must run after the game's describe steps, which is where the
