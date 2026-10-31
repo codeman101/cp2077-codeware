@@ -13,6 +13,17 @@ constexpr auto ControllerSeparator = ':';
 
 Red::ClassLocator<Red::ink::IWidgetController> s_gameControllerType;
 Red::ClassLocator<Red::ink::WidgetLogicController> s_logicControllerType;
+
+bool IsGameControllerInjectionEnabled()
+{
+#if defined(__APPLE__)
+    // Without a Mac address the flag resolves to null; Codeware then injects the controllers itself, as before 1.21.
+    const auto* flag = Raw::InkSpawner::ControllerInjectionEnabled::Get();
+    return flag && *flag;
+#else
+    return Raw::InkSpawner::ControllerInjectionEnabled::Ref();
+#endif
+}
 }
 
 void App::WidgetSpawningService::OnBootstrap()
@@ -173,7 +184,7 @@ uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResour
 {
     auto result = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aInstance, aItemName);
 
-    if (!aInstance && !Raw::InkSpawner::ControllerInjectionEnabled::Ref())
+    if (!aInstance && !IsGameControllerInjectionEnabled())
     {
         auto* itemNameStr = aItemName.ToString();
         auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
@@ -258,7 +269,7 @@ void App::WidgetSpawningService::OnFinishAsyncSpawn(Red::InkSpawningContext& aCo
     const char* itemNameStr = nullptr;
     const char* controllerSep = nullptr;
 
-    if (!Raw::InkSpawner::ControllerInjectionEnabled::Ref())
+    if (!IsGameControllerInjectionEnabled())
     {
         itemNameStr = aContext.request->itemName.ToString();
         controllerSep = strchr(itemNameStr, ControllerSeparator);
