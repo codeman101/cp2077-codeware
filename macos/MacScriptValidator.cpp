@@ -696,6 +696,9 @@ bool OnValidate(void* aValidator, Red::ScriptBundle* aBundle, void* aReport)
     }
 
     const bool result = Raw::ScriptValidator::Validate(aValidator, aBundle, aReport);
+    // The bundle's ScriptProperty objects are freed with the bundle; a crash report after this point must not read them.
+    g_lastScriptProp.store(nullptr, std::memory_order_relaxed);
+    g_lastNativeProp.store(nullptr, std::memory_order_relaxed);
     Mac::MarkScriptsValidated(); // R18. The ScriptBundle destructor hook starts the services only after this.
 
     try
