@@ -1,3 +1,5 @@
+// CODE GENERATED. DO NOT EDIT.
+
 @addField(gameuiCreditsController)
 public native let creditsResourceXBOX: ResourceRef; // rRef<inkCreditsResource>
 

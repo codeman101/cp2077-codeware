@@ -17,14 +17,33 @@ struct WorldNodeSetupWrapper : Red::IScriptable
     WorldNodeSetupWrapper(const WorldNodeSetupWrapper&) = default;
     WorldNodeSetupWrapper(WorldNodeSetupWrapper&&) = default;
 
-    [[nodiscard]] uint16_t GetNodeIndex() const
-    {
-        return static_cast<uint16_t>(setup->nodeIndex);
-    }
-
     [[nodiscard]] Red::Handle<Red::worldNode> GetNode() const
     {
         return Red::AsHandle(setup->node);
+    }
+
+    [[nodiscard]] uint16_t GetNodeIndex() const
+    {
+        if (buffer->version >= 68)
+        {
+            return static_cast<uint16_t>(setup->nodeIndex);
+        }
+        else
+        {
+            return setup->v62.nodeIndex;
+        }
+    }
+
+    [[nodiscard]] uint32_t GetInstanceIndex() const
+    {
+        if (buffer->version >= 68)
+        {
+            return setup->instanceIndex;
+        }
+        else
+        {
+            return std::numeric_limits<uint32_t>::max();
+        }
     }
 
     [[nodiscard]] Red::Transform GetTransform() const
@@ -69,7 +88,14 @@ struct WorldNodeSetupWrapper : Red::IScriptable
 
     [[nodiscard]] float GetStreamingDistance() const
     {
-        return setup->streamingDistance;
+        if (buffer->version >= 68)
+        {
+            return setup->streamingDistance;
+        }
+        else
+        {
+            return setup->v62.streamingDistance;
+        }
     }
 
     [[nodiscard]] Red::Vector3 GetSecondaryRefPointPosition() const
@@ -79,15 +105,50 @@ struct WorldNodeSetupWrapper : Red::IScriptable
 
     [[nodiscard]] float GetSecondaryRefPointDistance() const
     {
-        return setup->secondaryRefPointDistance;
+        if (buffer->version >= 68)
+        {
+            return setup->secondaryRefPointDistance;
+        }
+        else
+        {
+            return setup->v62.secondaryRefPointDistance;
+        }
     }
 
-    void SetNodeIndex(const uint16_t aIndex) const
+    [[nodiscard]] Red::worldStreamingDataGroup GetDataGroup() const
     {
-        if (aIndex >= 0 && aIndex < buffer->nodeSetups.GetInstanceCount())
+        if (buffer->version >= 68)
         {
-            setup->nodeIndex = aIndex;
-            setup->node = buffer->nodes[setup->nodeIndex].instance;
+            return setup->dataGroup;
+        }
+        else
+        {
+            return Red::worldStreamingDataGroup::Base;
+        }
+    }
+
+    void SetNodeIndex(uint16_t aIndex) const
+    {
+        if (aIndex >= 0 && aIndex < buffer->nodeSetups.GetCount())
+        {
+            if (buffer->version >= 68)
+            {
+                setup->nodeIndex = aIndex;
+            }
+            else
+            {
+                setup->v62.nodeIndex = aIndex;
+            }
+
+            setup->node = buffer->nodes[aIndex].instance;
+        }
+    }
+
+    void SetInstanceIndex(uint32_t aIndex) const
+    {
+        if (buffer->version >= 68)
+        {
+            setup->instanceIndex = aIndex;
         }
     }
 
@@ -133,7 +194,14 @@ struct WorldNodeSetupWrapper : Red::IScriptable
 
     void SetStreamingDistance(float aDistance) const
     {
-        setup->streamingDistance = aDistance;
+        if (buffer->version >= 68)
+        {
+            setup->streamingDistance = aDistance;
+        }
+        else
+        {
+            setup->v62.streamingDistance = aDistance;
+        }
     }
 
     void SetSecondaryRefPointPosition(const Red::Vector3& aPosition) const
@@ -143,7 +211,22 @@ struct WorldNodeSetupWrapper : Red::IScriptable
 
     void SetSecondaryRefPointDistance(float aDistance) const
     {
-        setup->secondaryRefPointDistance = aDistance;
+        if (buffer->version >= 68)
+        {
+            setup->secondaryRefPointDistance = aDistance;
+        }
+        else
+        {
+            setup->v62.secondaryRefPointDistance = aDistance;
+        }
+    }
+
+    void SetDataGroup(Red::worldStreamingDataGroup aGroup) const
+    {
+        if (buffer->version >= 68)
+        {
+            setup->dataGroup = aGroup;
+        }
     }
 
     Red::StreamingSectorNodeBuffer* buffer{};
@@ -155,8 +238,9 @@ struct WorldNodeSetupWrapper : Red::IScriptable
 }
 
 RTTI_DEFINE_CLASS(App::WorldNodeSetupWrapper, {
-    RTTI_METHOD(GetNodeIndex);
     RTTI_METHOD(GetNode);
+    RTTI_METHOD(GetNodeIndex);
+    RTTI_METHOD(GetInstanceIndex);
     RTTI_METHOD(GetTransform);
     RTTI_METHOD(GetPosition);
     RTTI_METHOD(GetOrientation);
@@ -168,7 +252,9 @@ RTTI_DEFINE_CLASS(App::WorldNodeSetupWrapper, {
     RTTI_METHOD(GetStreamingDistance);
     RTTI_METHOD(GetSecondaryRefPointPosition);
     RTTI_METHOD(GetSecondaryRefPointDistance);
+    RTTI_METHOD(GetDataGroup);
     RTTI_METHOD(SetNodeIndex);
+    RTTI_METHOD(SetInstanceIndex);
     RTTI_METHOD(SetTransform);
     RTTI_METHOD(SetPosition);
     RTTI_METHOD(SetOrientation);
@@ -180,4 +266,5 @@ RTTI_DEFINE_CLASS(App::WorldNodeSetupWrapper, {
     RTTI_METHOD(SetStreamingDistance);
     RTTI_METHOD(SetSecondaryRefPointPosition);
     RTTI_METHOD(SetSecondaryRefPointDistance);
+    RTTI_METHOD(SetDataGroup);
 });

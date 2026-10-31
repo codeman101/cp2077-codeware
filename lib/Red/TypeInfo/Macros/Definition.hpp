@@ -4,7 +4,11 @@
 #define X_RTTI_STR2(x) X_RTTI_STR1(x)
 #define X_RTTI_LOCATION __FILE__ ":" X_RTTI_STR2(__LINE__)
 
-#if defined(__APPLE__)
+// The registrar of a definition is an `inline static` member of a class template specialization
+// (Red::ClassDefinition<T>::s_registrar). MSVC instantiates it eagerly. Clang and GCC instantiate it only when it is
+// odr-used, so without this every RTTI_DEFINE_* of the plugin silently never registers. Taking the address in a
+// variable the linker must keep (`used`) odr-uses it. Empty on MSVC.
+#if defined(__clang__) || defined(__GNUC__)
 #define X_RTTI_CAT2(a, b) a##b
 #define X_RTTI_CAT(a, b) X_RTTI_CAT2(a, b)
 #define X_RTTI_FORCE_REGISTRAR(...) \
@@ -13,7 +17,7 @@
 #define X_RTTI_FORCE_REGISTRAR(...)
 #endif
 
-#define X_RTTI_TYPENAME(...) ::nameof::nameof_short_type<__VA_ARGS__>()
+#define X_RTTI_TYPENAME(...) Red::Detail::ResolveBaseTypeNameStr<__VA_ARGS__>()
 
 #define X_RTTI_NAME_SV(...) []() constexpr noexcept { \
   constexpr auto _name = ::nameof::detail::pretty_name(#__VA_ARGS__); \
@@ -278,7 +282,8 @@ public: \
         { \
             _handler; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::GlobalDefinition<X_RTTI_LOCATION>)
 
 #define RTTI_DESCRIBE(_handler) \
     template<> \
@@ -289,4 +294,5 @@ public: \
         { \
             _handler; \
         } \
-    };
+    }; \
+    X_RTTI_FORCE_REGISTRAR(Red::GlobalDefinition<X_RTTI_LOCATION>)

@@ -119,9 +119,6 @@ public:
         return counts;
     }
 #endif
-    // Game 2.5 declares GameInstance.GetCallbackSystem(opt gi: GameInstance).
-    static constexpr bool GetterTakesGameInstance = true;
-
 protected:
     void OnWorldAttached(Red::world::RuntimeScene*) override;
     // void OnStreamingWorldLoaded(Red::world::RuntimeScene*, uint64_t aRestored, const Red::JobGroup&) override;

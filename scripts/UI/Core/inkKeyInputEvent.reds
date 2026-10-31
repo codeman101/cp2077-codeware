@@ -1,5 +1,3 @@
-// Game 2.5 declares `native class inkKeyInputEvent extends inkInputEvent` with the fields key, action,
-// character and IsCharacter().
 @addMethod(inkKeyInputEvent)
 public native func GetKey() -> EInputKey
 

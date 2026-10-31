@@ -1,5 +1,4 @@
 #include "StaticEntitySystem.hpp"
-#include "Red/GameSystemCalls.hpp"
 #include "Red/Entity.hpp"
 #include "Red/RuntimeScene.hpp"
 #if defined(__APPLE__)
@@ -154,7 +153,7 @@ Red::EntityID App::StaticEntitySystem::SpawnEntity(const StaticEntitySpecPtr& aE
     if (!ValidateEntitySpec(aEntitySpec))
         return {};
 
-    const Red::EntityID entityID = Red::NextTransientEntityID(m_entityIDSystem);
+    auto entityID = m_entityIDSystem->GetNextTransientID();
 
     if (!entityID.IsDefined())
         return {};

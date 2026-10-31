@@ -53,15 +53,6 @@ concept HasSystemGetter = requires(T*)
     { T::Get() } -> std::convertible_to<Handle<T>>;
 };
 
-// A system whose GameInstance getter is declared by the game's own scripts with one optional
-// GameInstance parameter (game 2.5: `GetCallbackSystem(opt gi: GameInstance)`), so the getter must
-// consume that parameter from the stack frame.
-template<typename T>
-concept HasGameInstanceGetterParam = requires(T*)
-{
-    { T::GetterTakesGameInstance } -> std::convertible_to<bool>;
-} && T::GetterTakesGameInstance;
-
 template<typename TSpec>
 concept HasMinValueGetter = requires
 {
@@ -536,11 +527,8 @@ public:
         if (name != aAlias)
         {
             auto rtti = CRTTISystem::Get();
-            if (rtti->scriptToNative.Get(aAlias) == nullptr)
-            {
-                rtti->scriptToNative.Insert(aAlias, name);
-                rtti->nativeToScript.Insert(name, aAlias);
-            }
+            rtti->scriptToNative.InsertOrAssign(aAlias, name);
+            rtti->nativeToScript.InsertOrAssign(name, aAlias);
         }
     }
 
@@ -557,19 +545,22 @@ public:
     {
         auto* ptr = reinterpret_cast<ScriptingFunction_t<TRet*>>(aFunc);
 
-        CClassFunction* func;
         if constexpr (std::is_same_v<TContext, IScriptable>)
         {
-            func = CClassStaticFunction::Create(this, aName, aName, ptr, aFlags);
+            auto func = CClassStaticFunction::Create(this, aName, aName, ptr, aFlags);
+
+            RegisterFunction(func);
+
+            return func;
         }
         else
         {
-            func = CClassFunction::Create(this, aName, aName, ptr, aFlags);
+            auto func = CClassFunction::Create(this, aName, aName, ptr, aFlags);
+
+            RegisterFunction(func);
+
+            return func;
         }
-
-        RegisterFunction(func);
-
-        return func;
     }
 
     template<auto AFunction>
@@ -689,12 +680,58 @@ public:
 
         return func;
     }
+
+    void RegisterFunction(CClassFunction* aFunc)
+    {
+        if (aFunc->flags.isStatic)
+        {
+            auto functionExists = false;
+
+            for (auto& existingFunc : staticFuncs)
+            {
+                if (existingFunc->shortName == aFunc->shortName)
+                {
+                    existingFunc = static_cast<CClassStaticFunction*>(aFunc);
+                    functionExists = true;
+                    break;
+                }
+            }
+
+            if (!functionExists)
+            {
+                staticFuncs.PushBack(static_cast<CClassStaticFunction*>(aFunc));
+            }
+        }
+        else
+        {
+            auto functionExists = false;
+
+            for (auto& existingFunc : funcs)
+            {
+                if (existingFunc->shortName == aFunc->shortName)
+                {
+                    existingFunc = aFunc;
+                    functionExists = true;
+                    break;
+                }
+            }
+
+            if (!functionExists)
+            {
+                funcs.PushBack(aFunc);
+            }
+        }
+    }
 };
 
 template<typename TClass>
 class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
 {
-    const bool IsEqual(Detail::ConstInstancePtr aLhs, Detail::ConstInstancePtr aRhs, uint32_t a3) final // 48
+#if defined(__APPLE__)
+    bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
+#else
+    const bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
+#endif
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -974,9 +1011,11 @@ struct SystemBuilder
     static inline void ScriptGetter(Red::IScriptable* aContext, Red::CStackFrame* aFrame,
                                     Red::Handle<Red::IScriptable>* aRet, int64_t)
     {
-        if constexpr (Detail::HasGameInstanceGetterParam<TSystem>)
+        constexpr uint8_t ParamEndOp = 38;
+
+        if (*aFrame->code != ParamEndOp)
         {
-            ScriptGameInstance gameInstance{};
+            ScriptGameInstance gameInstance;
             Red::GetParameter(aFrame, &gameInstance);
         }
 
@@ -1023,17 +1062,28 @@ struct SystemBuilder
         constexpr auto systemTypeStr = GetTypeNameStr<TSystem>();
         constexpr auto systemNameStr = Detail::UpFirstConstStr<systemTypeStr.size()>(systemTypeStr.data());
         constexpr auto getterNameStr = Detail::ConcatConstStr<3, systemNameStr.size() - 1>("Get", systemNameStr.data());
+        constexpr auto getterName = Red::CName(getterNameStr.data());
 
         auto gameType = GetClass<ScriptGameInstance>();
         auto getterFunc = CClassStaticFunction::Create(gameType, getterNameStr.data(), getterNameStr.data(), &ScriptGetter);
         getterFunc->SetReturnType(CNamePool::Add(systemRefStr.data()));
 
-        if constexpr (Detail::HasGameInstanceGetterParam<TSystem>)
+        auto getterExists = false;
+
+        for (auto& existingFunc : gameType->staticFuncs)
         {
-            getterFunc->AddParam(GetTypeName<ScriptGameInstance>(), "gi", false, true);
+            if (existingFunc->shortName == getterFunc->shortName)
+            {
+                existingFunc = getterFunc;
+                getterExists = true;
+                break;
+            }
         }
 
-        gameType->staticFuncs.PushBack(getterFunc);
+        if (!getterExists)
+        {
+            gameType->staticFuncs.PushBack(getterFunc);
+        }
     }
 
     static inline void RegisterSystem()
@@ -1208,6 +1258,12 @@ struct ClassDefinition
         {
             SystemBuilder<TClass>::RegisterGetter();
             SystemBuilder<TClass>::RegisterSystem();
+        }
+
+        if (auto alias = rtti->GetClassByScriptName(name))
+        {
+            rtti->scriptToNative.InsertOrAssign(name, name);
+            rtti->nativeToScript.InsertOrAssign(name, name);
         }
     }
 

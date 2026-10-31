@@ -41,6 +41,8 @@ RED4EXT_ASSERT_OFFSET(InkSpawningInfo, context, 0x38);
 
 namespace Raw::InkSpawner
 {
+using ControllerInjectionEnabled = Core::RawPtr<Red::AddressLib::InkSpawner_ControllerInjectionEnabled, bool>;
+
 constexpr auto FinishAsyncSpawn = Core::RawFunc<
     /* addr = */ Red::AddressLib::InkSpawner_FinishAsyncSpawn,
     /* type = */ bool (*)(

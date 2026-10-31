@@ -173,7 +173,7 @@ uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResour
 {
     auto result = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aInstance, aItemName);
 
-    if (!aInstance)
+    if (!aInstance && !Raw::InkSpawner::ControllerInjectionEnabled::Ref())
     {
         auto* itemNameStr = aItemName.ToString();
         auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
@@ -255,12 +255,18 @@ void App::WidgetSpawningService::OnFinishAsyncSpawn(Red::InkSpawningContext& aCo
         }
     }
 #endif
-    auto* itemNameStr = aContext.request->itemName.ToString();
-    auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
+    const char* itemNameStr = nullptr;
+    const char* controllerSep = nullptr;
 
-    if (controllerSep)
+    if (!Raw::InkSpawner::ControllerInjectionEnabled::Ref())
     {
-        InjectController(aInstance, controllerSep + 1);
+        itemNameStr = aContext.request->itemName.ToString();
+        controllerSep = strchr(itemNameStr, ControllerSeparator);
+
+        if (controllerSep)
+        {
+            InjectController(aInstance, controllerSep + 1);
+        }
     }
 
     if (s_widgetSpawnEventEnabled)
@@ -330,7 +336,7 @@ void App::WidgetSpawningService::InjectDependency(Red::ink::WidgetLibraryResourc
 }
 
 void App::WidgetSpawningService::InjectController(Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
-                                                Red::CName aControllerName)
+                                                  Red::CName aControllerName)
 {
     auto* controllerType = Red::CRTTISystem::Get()->GetClass(aControllerName);
 

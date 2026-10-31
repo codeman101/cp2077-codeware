@@ -25,9 +25,6 @@ public native let ListOfModsToDisplayUpdated: gameuiSendModGridInfoCallback;
 public native let PagesLayoutChanged: gameuiUpdatePageLayoutCallback;
 
 @addField(ModioBrowserMenuGameController)
-public native let SwitchBetweenBrowserAndCollectionMenu: inkBoolCallback;
-
-@addField(ModioBrowserMenuGameController)
 public native let RequestLogoForWidget: gameuiRequestMediaForWidgetCallback;
 
 @addField(ModioBrowserMenuGameController)
