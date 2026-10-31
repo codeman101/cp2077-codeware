@@ -73,6 +73,9 @@ const std::unordered_map<uint32_t, uintptr_t>& MacRows()
         {225197914, 0x4353D74},  // InkWidgetLibrary_AsyncSpawnFromExternal: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x208F250).
         {2698985195, 0x4368F34}, // InkSpawner_FinishAsyncSpawn. void(InkSpawningContext*, Handle<WidgetLibraryItemInstance>&): the call operator of the std::function behind InkSpawningInfo. Windows 0xFA63F0.
         {4097515464, 0x4368F34}, // InkSpawner_FinishAsyncSpawn: the 2.5 hash of the same function (psiberx/cp2077-codeware#63, Windows 0x209FBE0).
+        {2890273101, 0x9D03E78}, // InkSpawner_ControllerInjectionEnabled. Data: one byte in __DATA,__common (zerofill). The four spawn functions above
+                                 // and FinishAsyncSpawn load it first (ldrb, cmp #1) and take the "Item:Controller" path when it is 1. Its only
+                                 // two stores (0x4156600 sets 1, 0x4156610 sets 0) are never called or referenced, so in 2.5.0 it stays 0.
         {2671382832, 0x41ABBF4}, // InkLogicController_OnInitialize. void(controller): the base implementation shared by 82 vtables (slot 0x110). Windows 0x581514.
         {1159862457, 0x41ABD94}, // InkLogicController_OnUninitialize. void(controller): base implementation (slot 0x118). Windows 0x4A2B40.
         {3589084925, 0x41ABEA4}, // InkLogicController_OnArrangeChildrenComplete. void(controller): base implementation (slot 0x120). Windows 0x32B78C.
