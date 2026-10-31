@@ -727,11 +727,7 @@ public:
 template<typename TClass>
 class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
 {
-#if defined(__APPLE__)
-    bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
-#else
-    const bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
-#endif
+    const bool IsEqual(Detail::ConstInstancePtr aLhs, Detail::ConstInstancePtr aRhs, uint32_t a3) final // 48
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
