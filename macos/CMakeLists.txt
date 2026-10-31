@@ -70,6 +70,7 @@ set(CODEWARE_SOURCES
     MacR17.cpp
     MacCrashDiag.cpp
     MacScratchTail.cpp
+    MacInstancedMeshGuard.cpp
     ArchiveXLScripts.cpp
     Clipboard.mm
     KeyTranslate.mm

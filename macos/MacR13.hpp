@@ -31,6 +31,13 @@ void LogSectorNodes(void* aSector, unsigned long long aPathHash);
 bool InstallScratchTailHook();
 unsigned long long ScratchTailsZeroed();
 
+// MacInstancedMeshGuard.cpp. R82. Hooks the worldInstancedMeshNodeInstance attach (0x1B1F1C8) so that an instance whose mesh index
+// is outside its node's mesh list (an old-format mod node) is not attached instead of reading past the list (the Ghost Town SIGBUS).
+// NoteInstancedMeshSector logs, once per sector, a loaded streaming sector that holds such nodes (called from MacResourceJob.hpp).
+bool InstallInstancedMeshGuard();
+unsigned long long InstancedMeshInstancesSkipped();
+void NoteInstancedMeshSector(void* aResource, unsigned long long aPathHash);
+
 // MacGameInstanceHook.cpp. R14. Hooks the GetGameInstance native (0x1F42944) at plugin load. After the original
 // runs, an empty result is rebuilt with the live game instance when one exists. Needs the resolver and the driver.
 bool InstallGetGameInstanceHook();

@@ -47,6 +47,10 @@ inline void DispatchMacResourceJob(Red::ResourceSerializer** aCaptures, Red::CNa
                 {
                     Mac::LogSectorNodes(resource.instance, pathHash);
                 }
+                if (aIsLoad)
+                {
+                    Mac::NoteInstancedMeshSector(resource.instance, pathHash); // R82
+                }
                 MacHookStats::NoteResource(aStats, pathHash);
                 MacHookStats::NoteAudioTarget(pathHash, aIsLoad);
 

@@ -408,6 +408,7 @@ bool App::InstallMacCallbackHooks()
     install("PlayerSpawnedHook", &PlayerSpawnedHook::InstallMacHook);
     install("RawInputHook", &RawInputHook::InstallMacHook);
     install("ScratchTailHook", &Mac::InstallScratchTailHook); // R81, macos/MacScratchTail.cpp
+    install("InstancedMeshGuard", &Mac::InstallInstancedMeshGuard); // R82, macos/MacInstancedMeshGuard.cpp
     return ok;
 }
 #endif
