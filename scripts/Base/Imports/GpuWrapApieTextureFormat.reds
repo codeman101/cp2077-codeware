@@ -1,3 +1,5 @@
+// CODE GENERATED. DO NOT EDIT.
+
 public enum GpuWrapApieTextureFormat {
   TEXFMT_NULL = 64,
   TEXFMT_A8_Unorm = 0,

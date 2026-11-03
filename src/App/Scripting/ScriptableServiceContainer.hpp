@@ -37,9 +37,6 @@ public:
     static Red::Handle<ScriptableServiceContainer>& Build(const std::filesystem::path& aStateDir);
     static Red::Handle<ScriptableServiceContainer>& Get();
 
-    // Game 2.5 declares GameInstance.GetScriptableServiceContainer(opt gi: GameInstance).
-    static constexpr bool GetterTakesGameInstance = true;
-
 private:
 #if defined(__APPLE__)
     // R18. OnInitializeGameInstance runs from the CGameFramework::InitializeGameInstance hook (ScriptingService). The

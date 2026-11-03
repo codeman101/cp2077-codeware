@@ -22,4 +22,3 @@ public func SetSupportFocus(enabled: Bool) {
 public func AddEffect(effect: ref<inkIEffect>) {
     ArrayPush(this.effects, effect);
 }
-

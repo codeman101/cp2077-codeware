@@ -35,10 +35,10 @@ struct inkKeyInputEvent : Red::inkInputEvent
 };
 }
 
-static_assert(offsetof(App::inkKeyInputEvent, key) == 0x90);
-static_assert(offsetof(App::inkKeyInputEvent, action) == 0x94);
-static_assert(offsetof(App::inkKeyInputEvent, character) == 0x98);
-static_assert(sizeof(App::inkKeyInputEvent) == 0xB8);
+RED4EXT_ASSERT_OFFSET(App::inkKeyInputEvent, key, 0x90);
+RED4EXT_ASSERT_OFFSET(App::inkKeyInputEvent, action, 0x94);
+RED4EXT_ASSERT_OFFSET(App::inkKeyInputEvent, character, 0x98);
+RED4EXT_ASSERT_SIZE(App::inkKeyInputEvent, 0xB8);
 
 RTTI_DEFINE_CLASS(App::inkKeyInputEvent, {
     RTTI_PARENT(Red::inkInputEvent);

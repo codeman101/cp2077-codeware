@@ -38,8 +38,6 @@ public func SetOverflowPolicy(overflowPolicy: textOverflowPolicy) {
     this.textOverflowPolicy = overflowPolicy;
 }
 
-
-
 @addMethod(inkText)
 public func GetLineHeight() -> Float {
     return this.lineHeightPercentage;

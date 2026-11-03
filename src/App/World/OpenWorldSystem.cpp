@@ -1,5 +1,4 @@
 #include "OpenWorldSystem.hpp"
-#include "Red/GameSystemCalls.hpp"
 #include "Core/Facades/Container.hpp"
 #include "Core/Facades/Log.hpp"
 #include "Red/CommunitySystem.hpp"
@@ -283,10 +282,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
 
     for (const auto& entityID : entityIDs)
     {
-        auto entity = Red::FindPopulationEntity(m_populationSystem, entityID);
+        auto entity = m_populationSystem->FindEntity(entityID);
 
         if (entity)
+        {
             return OpenWorldActivityResult::StillSpawned;
+        }
     }
 
     for (const auto& persistenceRef : aActivity->persistenceRefs)

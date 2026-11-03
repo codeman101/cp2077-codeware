@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Red/StreamingSector.hpp"
-
 namespace Red
 {
 struct WorldNodeInstanceNodeState
@@ -27,7 +25,7 @@ namespace Raw::WorldNodeInstance
 using Transform = Core::OffsetPtr<0x30, Red::Transform>;
 using Scale = Core::OffsetPtr<0x50, Red::Vector3>;
 using Node = Core::OffsetPtr<0x60, Red::Handle<Red::worldNode>>;
-using SetupInfo = Core::OffsetPtr<0x70, Red::CompiledNodeInstanceSetupInfo**>;
+using SetupInfo = Core::OffsetPtr<0x70, Red::worldCompiledNodeInstanceSetupInfo**>;
 using NodeID = Core::OffsetPtr<0x80, uint64_t>;
 #if defined(__APPLE__)
 // Mac 2.5.0: 0x8C (the state word moved 4 up; Windows keeps 0x88). Mac Initialize 0x1BBF9F4 and the accessors 0x1BC03EC use [x,#0x8c]

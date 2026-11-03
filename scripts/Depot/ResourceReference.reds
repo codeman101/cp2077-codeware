@@ -34,8 +34,6 @@ public func OperatorAssignMultiply(out res: ResourceAsyncRef, path: ResRef) {
     ResourceAsyncRef.SetPath(res, path);
 }
 
-
-
 public func OperatorEqual(lhs: ResourceAsyncRef, rhs: ResRef) -> Bool {
     return Equals(ResourceAsyncRef.GetPath(lhs), rhs);
 }

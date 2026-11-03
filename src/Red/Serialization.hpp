@@ -133,9 +133,8 @@ constexpr auto ReadObject = Core::RawFunc<
 #else
 constexpr auto WriteObject = Core::RawFunc<
     /* addr = */ Red::AddressLib::ObjectSerializer_WriteToBuffer,
-    /* type = */ void* (*)(Red::DataBuffer& aBuffer,
-                           const Red::Handle<Red::ISerializable>& aObject,
-                           uint64_t a3, uint32_t aSizeLimit)>();
+    /* type = */ Red::DataBuffer (*)(const Red::Handle<Red::ISerializable>& aObject,
+                                     uint64_t a3, uint32_t aSizeLimit)>();
 
 constexpr auto ReadObject = Core::RawFunc<
     /* addr = */ Red::AddressLib::ObjectSerializer_ReadFromStrean,
@@ -187,8 +186,7 @@ struct ObjectSerializer
         const Red::Handle<Red::ISerializable>& object = aObject;
         Red::DataBuffer buffer = Raw::ObjectSerializer::WriteObject(&object, 0xFFFFFFFFu, MagicSizeLimit);
 #else
-        Red::DataBuffer buffer;
-        Raw::ObjectSerializer::WriteObject(buffer, aObject, 0, MagicSizeLimit);
+        auto buffer = Raw::ObjectSerializer::WriteObject(aObject, 0, MagicSizeLimit);
 #endif
 
         std::ofstream out(aPath, std::ios::binary);
